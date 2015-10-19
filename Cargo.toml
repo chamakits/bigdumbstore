@@ -1,0 +1,4 @@
+[package]
+name = "bigdumbstore"
+version = "0.1.0"
+authors = ["Omar Ferrer <omar.ferrer.uprm@gmail.com>"]

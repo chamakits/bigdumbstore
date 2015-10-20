@@ -1,5 +1,7 @@
 use std::env;
-mod mode;
+mod bds;
+
+use bds::mode;
 
 fn main() {
 

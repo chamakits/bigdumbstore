@@ -14,7 +14,7 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
             Mode::Read(read_val)
         }
         x => {
-            println!("Given argument is: {}", x);
+            println!("Given argument is Invalid: {}", x);
             Mode::Invalid
         }
     }

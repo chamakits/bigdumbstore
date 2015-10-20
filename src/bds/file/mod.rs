@@ -68,6 +68,7 @@ pub fn seek_key(file: &mut File, key_size: i32) -> u64 {
     }
 }
 
+//TODO doesn't work. Hurray
 pub fn read_key(file: &mut File, key_size: i32) -> String {
     //let mut key_buffer = [0; (key_size+1) as usize];
     let mut key_buffer = Vec::with_capacity( (key_size + 1) as usize);

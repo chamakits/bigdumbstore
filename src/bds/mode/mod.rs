@@ -2,7 +2,7 @@
 pub enum Mode {
     //TODO maybe change to be a key only instead of the whole vector
     Read(Vec<String>),
-    Invalid,
+    Invalid(Vec<String>),
 }
 
 pub fn determine_mode(arguments: Vec<String>) -> Mode {
@@ -15,7 +15,7 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
         }
         x => {
             println!("Given argument is Invalid: {}", x);
-            Mode::Invalid
+            Mode::Invalid(arguments.to_vec())
         }
     }
 }

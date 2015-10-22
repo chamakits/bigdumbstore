@@ -85,9 +85,9 @@ pub fn read_key(file: &mut File, key_size: i32) -> String {
     return String::from(res)
 }
 
-pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) {
+pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) -> u64 {
     match file.seek(SeekFrom::Current( -(value_size + key_size) as i64)) {
         Err(why) => panic!("Could not seek value. Err:{}",why),
         Ok(pos) => pos
-    };
+    }
 }

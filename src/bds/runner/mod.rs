@@ -21,6 +21,29 @@ pub fn reading(read_args: Vec<String>) {
     println!("Value size:{}", value_size);
 
     file::seek_key(file_mut, key_size);
-    let mut key = file::read_key(file_mut, key_size);
+    let key = file::read_key(file_mut, key_size);
     println!("Key: {}", key);
+
+    let key_to_find_src = read_args.get(0).unwrap();
+
+    let key_to_find = key_to_find_src;
+    let key_check = &key;
+    let mut is_key_found = key_to_find == key_check;
+
+    println!("Comparing {} == {}?: {}", key_to_find, key_check, is_key_found);
+    println!("To find bytes: {:?} ; key bytes: {:?}", key_to_find.to_string().into_bytes(), key_check.to_string().into_bytes());
+     /*
+    key_to_find+1;
+    (*key_to_find)+1;
+    key+1;
+    */
+
+    file::seek_value(file_mut, value_size, key_size);
+    println!("Seeked");
+
+    if is_key_found {
+        let mut value_found = file::read_key(file_mut, value_size);
+        println!("Value found:{}", value_found);
+    }
+    
 }

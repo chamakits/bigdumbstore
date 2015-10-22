@@ -80,6 +80,14 @@ pub fn read_key(file: &mut File, key_size: i32) -> String {
             println!("File read:{}", x)
         }
     }
-    let res = String::from_utf8_lossy(&mut key_buffer).into_owned();
-    return res
+    let mut res = String::from_utf8_lossy(&mut key_buffer).into_owned();
+    res.truncate(key_size as usize);
+    return String::from(res)
+}
+
+pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) {
+    match file.seek(SeekFrom::Current( -(value_size + key_size) as i64)) {
+        Err(why) => panic!("Could not seek value. Err:{}",why),
+        Ok(pos) => pos
+    };
 }

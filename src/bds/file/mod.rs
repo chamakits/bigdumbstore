@@ -82,7 +82,8 @@ pub fn read_key(file: &mut File, key_size: i32) -> String {
     }
     let mut res = String::from_utf8_lossy(&mut key_buffer).into_owned();
     res.truncate(key_size as usize);
-    return String::from(res)
+
+    return res
 }
 
 pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) -> u64 {

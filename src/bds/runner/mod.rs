@@ -46,8 +46,11 @@ pub fn reading(read_args: Vec<String>) {
         println!("Seeked");
 
         if is_key_found {
-            let mut value_found = file::read_key(file_mut, value_size);
-            println!("Value found:{}", value_found);
+            //TODO this minus one I think comes because the bds-c writer i think is writing some new lines, so if I fix this, I should probably eventually remove this minus one eventually.
+            let mut value_found = file::read_key(file_mut, value_size-1);
+            let l = value_found.len();
+            //            value_found.truncate(l -1);
+            println!("Value found:'{}'", value_found);
         } else if position_of_next_key == 0 {
             return;
         }

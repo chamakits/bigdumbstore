@@ -69,7 +69,6 @@ pub fn seek_key(file: &mut File, key_size: i32) -> u64 {
     }
 }
 
-//TODO doesn't work. Hurray
 pub fn read_key(file: &mut File, key_size: i32) -> String {
     //TODO this is limited to only read data that fits in size. Improve
     let mut key_buffer = [0; BUFF_SIZE];
@@ -77,7 +76,7 @@ pub fn read_key(file: &mut File, key_size: i32) -> String {
     match file_take.read(&mut key_buffer) {
         Err(why) => panic!("Could not read size bytes. Err:{}",why),
         Ok(x) => {
-            println!("File read:{}", x)
+            debug!("File read:{}", x)
         }
     }
     let mut res = String::from_utf8_lossy(&mut key_buffer).into_owned();

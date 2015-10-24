@@ -1,11 +1,12 @@
 //use super::mode;
 use super::file;
+use std::io::prelude::*;
 
 //TODO change all the seek/read stuff to just one method each.
 //TODO have this return a value instead of printing out
 pub fn reading(read_args: Vec<String>) {
     debug!("Will be reading with args: {:?}", read_args);
-    let mut file_opened = file::open_kv_file();
+    let mut file_opened = file::open_kv_file_read();
     let file_mut = &mut file_opened;
     file::seek_end(file_mut);
     let mut is_key_found = false;
@@ -60,4 +61,27 @@ pub fn reading(read_args: Vec<String>) {
 
 pub fn writing(write_args: Vec<String>) {
     debug!("Will be writing with args: {:?}", write_args);
+
+    let _key_to_write = write_args.get(0).unwrap();
+    let key_and_size = (_key_to_write, _key_to_write.len());
+    let input_and_size = file::read_from_stdin();
+
+    let mut file_opened = file::open_kv_file_write();
+    let file_mut = &mut file_opened;
+
+    let to_write = format!("{}{}{:03}{:03}",
+                           input_and_size.0,
+                           key_and_size.0,
+                           input_and_size.1,
+                           key_and_size.1);
+    //let input_size_string = format!("{:03}", input_and_size.1);
+
+    debug!("to_write = {}", to_write);
+
+    match file_mut.write_all(&to_write.into_bytes()) {
+        Err(why) => panic!("Could not write value. Err: [{}]",why),
+        Ok(wrote) => wrote
+    }
+
+    
 }

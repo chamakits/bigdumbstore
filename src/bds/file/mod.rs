@@ -3,30 +3,38 @@ use std::fs::File;
 use std::error::Error;
 use std::io::SeekFrom;
 use std::io::prelude::*;
+use std::io;
+use std::fs::OpenOptions;
 
+//S Open file
 //TODO do this in a smart way
-const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store";
+//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store";
+const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
 const BUFF_SIZE: usize = 1024;
 
 //TODO change everything in this file from i32 to i64
-pub fn open_kv_file() -> File {
+pub fn open_kv_file_read() -> File {
     let file = match File::open(KV_FILE) {
         // The `description` method of `io::Error` returns a string that
         // describes the error
-        Err(why) => panic!("couldn't open {}: {}", KV_FILE,
+        Err(why) => panic!("couldn't open for reading {}: {}", KV_FILE,
                            Error::description(&why)),
         Ok(file) => file,
     };
     return file;
 }
 
-/*
-pub fn seek_end(file: &Result<File>) {
-    let f = try!(file);
-    try!(f.seek(SeekFrom::End(0)));
+pub fn open_kv_file_write() -> File {
+    let file = match OpenOptions::new().write(true).append(true).open(KV_FILE) {
+        Err(why) => panic!("couldn't open for writing {}: {}", KV_FILE,
+                           Error::description(&why)),
+        Ok(file) => file,
+    };
+    return file;
 }
- */
+//E Open file
 
+//S Functions used for reading
 pub fn seek_end(file: &mut File) {
     //let seek_res = file.seek(SeekFrom::End(0));
     match file.seek(SeekFrom::End(0)) {
@@ -91,3 +99,20 @@ pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) -> u64 {
         Ok(pos) => pos
     }
 }
+//E Functions used for reading
+
+//S Functions used for writing
+pub fn read_from_stdin() -> (String, usize) {
+    /*
+    let mut stdin_buff = [0; BUFF_SIZE];
+    io.stdin().read(stdin_buff)
+     */
+    let mut string_in = &mut String::with_capacity(BUFF_SIZE);
+    let _read_size = io::stdin().read_to_string(string_in);
+    let read_size = _read_size.unwrap();
+    string_in.truncate(read_size);
+    
+    debug!("Read from input:{}", string_in);
+    return (string_in.to_string(), read_size);
+}
+//E Functions used for writing

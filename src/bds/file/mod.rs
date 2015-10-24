@@ -15,7 +15,6 @@ const BUFF_SIZE: usize = 1024;
 
 //S converting to BdsFile
 pub struct BdsFile {
-    //bds_file: &'a mut File
     bds_file: File
 }
 const SEEK_GOTO_END: SeekFrom = SeekFrom::End(0);
@@ -25,8 +24,6 @@ const SEEK_VALUE_SIZE_POST_READ_KEY_SIZE: SeekFrom = SeekFrom::Current(-6);
 impl BdsFile {
     pub fn new_read(file_path:&str) -> BdsFile {
         let file = match File::open(file_path) {
-            // The `description` method of `io::Error` returns a string that
-            // describes the error
             Err(why) => panic!("couldn't open for reading {}: {}", file_path,
                                Error::description(&why)),
             Ok(file) => file,
@@ -47,8 +44,6 @@ impl BdsFile {
         }
     }
 
-    //TODO change all the seek/read stuff to just one method each.
-    //TODO have this return a value instead of printing out
     pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
         let file_mut = &mut self.bds_file;
         //file::seek_end(file_mut);
@@ -124,7 +119,7 @@ impl BdsFile {
             Ok(wrote) => wrote
         }
     }
-    //S
+
     fn seek_with(file: &mut File, seeker: SeekFrom) -> u64 {
         match file.seek(seeker) {
             Err(why) => panic!("Could not seek with {:?}. Err:{}", seeker, why),
@@ -132,24 +127,24 @@ impl BdsFile {
         }
     }
 
-    fn read_size(file: &mut File) -> i32 {
+    fn read_size(file: &mut File) -> i64 {
         let mut size_buffer = [0; 3];
         match file.read(&mut size_buffer) {
             Err(why) => panic!("Could not read size bytes. Err:{}",why),
             _ => {}
         }
-        let res = match String::from_utf8_lossy(&mut size_buffer).to_mut().parse::<i32>() {
+        let res = match String::from_utf8_lossy(&mut size_buffer).to_mut().parse::<i64>() {
             Err(why) => panic!("Could not conver size to read to int. Err:{}", why),
             Ok(size_read) => size_read
         };
         return res
     }
 
-    fn seek_key(file: &mut File, key_size: i32) -> u64 {
-        BdsFile::seek_with(file, SeekFrom::Current(-(key_size + 3) as i64 ) )
+    fn seek_key(file: &mut File, key_size: i64) -> u64 {
+        BdsFile::seek_with(file, SeekFrom::Current(-(key_size + 3) ) )
     }
 
-    fn read_key(file: &mut File, key_size: i32) -> String {
+    fn read_key(file: &mut File, key_size: i64) -> String {
         //TODO this is limited to only read data that fits in size. Improve
         let mut key_buffer = [0; BUFF_SIZE];
         let mut file_take = file.take(key_size as u64);
@@ -165,9 +160,8 @@ impl BdsFile {
         return res
     }
 
-    fn seek_value(file: &mut File, value_size:i32, key_size:i32) -> u64 {
-        BdsFile::seek_with(file, SeekFrom::Current( -(value_size + key_size) as i64))
+    fn seek_value(file: &mut File, value_size:i64, key_size:i64) -> u64 {
+        BdsFile::seek_with(file, SeekFrom::Current( -(value_size + key_size)))
     }
-    //E
 }
 //E converting to BdsFile

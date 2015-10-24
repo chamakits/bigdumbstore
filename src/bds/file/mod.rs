@@ -7,41 +7,38 @@ use std::fs::OpenOptions;
 use std::io::Stdin;
 use super::file;
 
+//TODO change everything in this file from i32 to i64
+
 //S Open file
 //TODO do this in a smart way
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store";
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
-const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
 const BUFF_SIZE: usize = 1024;
-
-//TODO change everything in this file from i32 to i64
-pub fn open_kv_file_read() -> File {
-    let file = match File::open(KV_FILE) {
-        // The `description` method of `io::Error` returns a string that
-        // describes the error
-        Err(why) => panic!("couldn't open for reading {}: {}", KV_FILE,
-                           Error::description(&why)),
-        Ok(file) => file,
-    };
-    return file;
-}
-
-pub fn open_kv_file_write() -> File {
-    let file = match OpenOptions::new().write(true).append(true).open(KV_FILE) {
-        Err(why) => panic!("couldn't open for writing {}: {}", KV_FILE,
-                           Error::description(&why)),
-        Ok(file) => file,
-    };
-    return file;
-}
 //E Open file
 
 //S converting to BdsFile
-pub struct BdsFile<'a> {
-    bds_file: &'a mut File
+pub struct BdsFile {
+    //bds_file: &'a mut File
+    bds_file: File
 }
-impl<'a> BdsFile<'a> {
-    pub fn new( file:&'a mut File) -> BdsFile {
+impl BdsFile {
+    pub fn new_read(file_path:&str) -> BdsFile {
+        let file = match File::open(file_path) {
+            // The `description` method of `io::Error` returns a string that
+            // describes the error
+            Err(why) => panic!("couldn't open for reading {}: {}", file_path,
+                               Error::description(&why)),
+            Ok(file) => file,
+        };
+        BdsFile {
+            bds_file: file
+        }
+    }
+
+    pub fn new_write(file_path:&str) -> BdsFile {
+        let file = match OpenOptions::new().write(true).append(true).open(file_path) {
+            Err(why) => panic!("couldn't open for writing {}: {}", file_path,
+                               Error::description(&why)),
+            Ok(file) => file,
+        };
         BdsFile {
             bds_file: file
         }
@@ -84,12 +81,9 @@ impl<'a> BdsFile<'a> {
             debug!("Seeked");
 
             if is_key_found {
-                //OLD-TODO this minus one I think comes because the bds-c writer i think is writing some new lines, so if I fix this, I should probably eventually remove this minus one eventually.
                 //TODO Further investigation, it seems when you pipe values or use echo in to a command, it inclued a new line, which the bds-c writes in.
                 let value_found = file::read_key(file_mut, value_size-1);
                 debug!("Value found:'{}'", value_found);
-                //println!("{}", value_found);
-                //option_val = Option::Some(value_found.to_string());
                 option_val = Option::Some(value_found);
                 break;
             } else if position_of_next_key == 0 {

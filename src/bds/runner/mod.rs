@@ -14,7 +14,9 @@ pub fn reading(read_args: Vec<String>) {
     let mut bds = file::BdsFile::new_read(KV_FILE);
 
     let value_found = bds.find_value_by_key(key_to_find);
-    println!("{}", value_found.unwrap());
+    if value_found.is_some() {
+        println!("{}", value_found.unwrap());
+    }
 }
 
 pub fn writing(write_args: Vec<String>) {

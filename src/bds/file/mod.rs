@@ -53,17 +53,14 @@ impl BdsFile {
         while !is_key_found {
 
             debug!("About to seek key_size");
-            //let pos = file::seek_key_size(file_mut);
             let pos = BdsFile::seek_with(file_mut, SEEK_KEY_SIZE);
 
             if pos == 0 {
-                //TODO print to error
                 error!("Error! It seems this file is malformed, and only contains size for a first key");
             }
             let key_size = BdsFile::read_size(file_mut);
             debug!("Key size:{}", key_size);
 
-            //file::seek_value_size_post_read_key_size(file_mut);
             BdsFile::seek_with(file_mut, SEEK_VALUE_SIZE_POST_READ_KEY_SIZE);
             let value_size = BdsFile::read_size(file_mut);
             debug!("Value size:{}", value_size);

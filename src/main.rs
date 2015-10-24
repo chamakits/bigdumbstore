@@ -17,6 +17,7 @@ fn main() {
     debug!("Run mode is: {:?}", run_mode);
     match run_mode {
         Mode::Read(args) => runner::reading(args),
+        Mode::Write(args) => runner::writing(args),
         x => panic!("Parameter given is invalid. Args:{:?}", x),
     }
     

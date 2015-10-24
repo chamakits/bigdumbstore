@@ -4,6 +4,7 @@ use super::file;
 //TODO change all the seek/read stuff to just one method each.
 //TODO have this return a value instead of printing out
 pub fn reading(read_args: Vec<String>) {
+    debug!("Will be reading with args: {:?}", read_args);
     let mut file_opened = file::open_kv_file();
     let file_mut = &mut file_opened;
     file::seek_end(file_mut);
@@ -11,17 +12,17 @@ pub fn reading(read_args: Vec<String>) {
     while !is_key_found {
 
         debug!("About to seek key_size");
-        let mut pos = file::seek_key_size(file_mut);
+        let pos = file::seek_key_size(file_mut);
 
         if pos == 0 {
             //TODO print to error
             error!("Error! It seems this file is malformed, and only contains size for a first key");
         }
-        let mut key_size = file::read_size(file_mut);
+        let key_size = file::read_size(file_mut);
         debug!("Key size:{}", key_size);
 
         file::seek_value_size_post_read_key_size(file_mut);
-        let mut value_size = file::read_size(file_mut);
+        let value_size = file::read_size(file_mut);
         debug!("Value size:{}", value_size);
 
         file::seek_key(file_mut, key_size);
@@ -48,14 +49,15 @@ pub fn reading(read_args: Vec<String>) {
         if is_key_found {
             //OLD-TODO this minus one I think comes because the bds-c writer i think is writing some new lines, so if I fix this, I should probably eventually remove this minus one eventually.
             //TODO Further investigation, it seems when you pipe values in to a command, it inclued a new line, which the bds-c writes in.
-            let mut value_found = file::read_key(file_mut, value_size-1);
-            let l = value_found.len();
-            //            value_found.truncate(l -1);
+            let value_found = file::read_key(file_mut, value_size-1);
             debug!("Value found:'{}'", value_found);
             println!("{}", value_found);
         } else if position_of_next_key == 0 {
             return;
         }
     }
-    
+}
+
+pub fn writing(write_args: Vec<String>) {
+    debug!("Will be writing with args: {:?}", write_args);
 }

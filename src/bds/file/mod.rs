@@ -19,6 +19,10 @@ pub struct BdsFile {
     //bds_file: &'a mut File
     bds_file: File
 }
+const SEEK_GOTO_END: SeekFrom = SeekFrom::End(0);
+const SEEK_KEY_SIZE: SeekFrom = SeekFrom::Current(-3);
+const SEEK_VALUE_SIZE_POST_READ_KEY_SIZE: SeekFrom = SeekFrom::Current(-6);
+
 impl BdsFile {
     pub fn new_read(file_path:&str) -> BdsFile {
         let file = match File::open(file_path) {
@@ -48,13 +52,15 @@ impl BdsFile {
     //TODO have this return a value instead of printing out
     pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
         let file_mut = &mut self.bds_file;
-        file::seek_end(file_mut);
+        //file::seek_end(file_mut);
+        file::seek_with(file_mut, SEEK_GOTO_END);
         let mut is_key_found = false;
         let mut option_val:Option<String> = Option::None;
         while !is_key_found {
 
             debug!("About to seek key_size");
-            let pos = file::seek_key_size(file_mut);
+            //let pos = file::seek_key_size(file_mut);
+            let pos = file::seek_with(file_mut, SEEK_KEY_SIZE);
 
             if pos == 0 {
                 //TODO print to error
@@ -63,7 +69,8 @@ impl BdsFile {
             let key_size = file::read_size(file_mut);
             debug!("Key size:{}", key_size);
 
-            file::seek_value_size_post_read_key_size(file_mut);
+            //file::seek_value_size_post_read_key_size(file_mut);
+            file::seek_with(file_mut, SEEK_VALUE_SIZE_POST_READ_KEY_SIZE);
             let value_size = file::read_size(file_mut);
             debug!("Value size:{}", value_size);
 
@@ -122,17 +129,9 @@ impl BdsFile {
 //E converting to BdsFile
 
 //S Functions used for reading
-pub fn seek_end(file: &mut File) {
-    //let seek_res = file.seek(SeekFrom::End(0));
-    match file.seek(SeekFrom::End(0)) {
-        Err(why) => panic!("Could not seek to end of file. Err:{}",why),
-        _ => {}
-    }
-}
-
-pub fn seek_key_size(file: &mut File) -> u64 {
-    match file.seek(SeekFrom::Current(-3)) {
-        Err(why) => panic!("Could not seek to look for size. Err:{}",why),
+pub fn seek_with(file: &mut File, seeker: SeekFrom) -> u64 {
+    match file.seek(seeker) {
+        Err(why) => panic!("Could not seek with {:?}. Err:{}", seeker, why),
         Ok(pos) => pos
     }
 }
@@ -150,18 +149,8 @@ pub fn read_size(file: &mut File) -> i32 {
     return res
 }
 
-pub fn seek_value_size_post_read_key_size(file: &mut File) -> u64 {
-    match file.seek(SeekFrom::Current(-6)) {
-        Err(why) => panic!("Could not seek to look for value size. Err:{}",why),
-        Ok(pos) => pos
-    }
-}
-
 pub fn seek_key(file: &mut File, key_size: i32) -> u64 {
-    match file.seek(SeekFrom::Current(-(key_size + 3) as i64 )) {
-        Err(why) => panic!("Could not seek to look for value size. Err:{}",why),
-        Ok(pos) => pos
-    }
+    seek_with(file, SeekFrom::Current(-(key_size + 3) as i64 ) )
 }
 
 pub fn read_key(file: &mut File, key_size: i32) -> String {
@@ -181,10 +170,7 @@ pub fn read_key(file: &mut File, key_size: i32) -> String {
 }
 
 pub fn seek_value(file: &mut File, value_size:i32, key_size:i32) -> u64 {
-    match file.seek(SeekFrom::Current( -(value_size + key_size) as i64)) {
-        Err(why) => panic!("Could not seek value. Err:{}",why),
-        Ok(pos) => pos
-    }
+    seek_with(file, SeekFrom::Current( -(value_size + key_size) as i64))
 }
 //E Functions used for reading
 

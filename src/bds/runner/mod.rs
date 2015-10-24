@@ -1,62 +1,18 @@
 use super::file;
 use std::io;
 
-//TODO change all the seek/read stuff to just one method each.
-//TODO have this return a value instead of printing out
 pub fn reading(read_args: Vec<String>) {
     debug!("Will be reading with args: {:?}", read_args);
+    let key_to_find = read_args.get(0).unwrap();
+
     let mut file_opened = file::open_kv_file_read();
     let file_mut = &mut file_opened;
-    file::seek_end(file_mut);
-    let mut is_key_found = false;
-    while !is_key_found {
+    let mut bds = file::BdsFile::new(file_mut);
 
-        debug!("About to seek key_size");
-        let pos = file::seek_key_size(file_mut);
-
-        if pos == 0 {
-            //TODO print to error
-            error!("Error! It seems this file is malformed, and only contains size for a first key");
-        }
-        let key_size = file::read_size(file_mut);
-        debug!("Key size:{}", key_size);
-
-        file::seek_value_size_post_read_key_size(file_mut);
-        let value_size = file::read_size(file_mut);
-        debug!("Value size:{}", value_size);
-
-        file::seek_key(file_mut, key_size);
-        let key = file::read_key(file_mut, key_size);
-        debug!("Key: {}", key);
-
-        let key_to_find_src = read_args.get(0).unwrap();
-
-        let key_to_find = key_to_find_src;
-        let key_check = &key;
-        is_key_found = key_to_find == key_check;
-
-        debug!("Comparing {} == {}?: {}", key_to_find, key_check, is_key_found);
-        debug!("To find bytes: {:?} ; key bytes: {:?}", key_to_find.to_string().into_bytes(), key_check.to_string().into_bytes());
-        /*
-        key_to_find+1;
-        (*key_to_find)+1;
-        key+1;
-         */
-
-        let position_of_next_key = file::seek_value(file_mut, value_size, key_size);
-        debug!("Seeked");
-
-        if is_key_found {
-            //OLD-TODO this minus one I think comes because the bds-c writer i think is writing some new lines, so if I fix this, I should probably eventually remove this minus one eventually.
-            //TODO Further investigation, it seems when you pipe values in to a command, it inclued a new line, which the bds-c writes in.
-            let value_found = file::read_key(file_mut, value_size-1);
-            debug!("Value found:'{}'", value_found);
-            println!("{}", value_found);
-        } else if position_of_next_key == 0 {
-            return;
-        }
-    }
+    let value_found = bds.find_value_by_key(key_to_find);
+    println!("{}", value_found.unwrap());
 }
+
 pub fn writing(write_args: Vec<String>) {
     let key_to_write = write_args.get(0).unwrap();
     let mut stdin = &mut io::stdin();

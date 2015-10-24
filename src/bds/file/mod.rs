@@ -5,6 +5,7 @@ use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
 use std::io::Stdin;
+use super::file;
 
 //S Open file
 //TODO do this in a smart way
@@ -44,6 +45,59 @@ impl<'a> BdsFile<'a> {
         BdsFile {
             bds_file: file
         }
+    }
+
+    //TODO change all the seek/read stuff to just one method each.
+    //TODO have this return a value instead of printing out
+    pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
+        let file_mut = &mut self.bds_file;
+        file::seek_end(file_mut);
+        let mut is_key_found = false;
+        let mut option_val:Option<String> = Option::None;
+        while !is_key_found {
+
+            debug!("About to seek key_size");
+            let pos = file::seek_key_size(file_mut);
+
+            if pos == 0 {
+                //TODO print to error
+                error!("Error! It seems this file is malformed, and only contains size for a first key");
+            }
+            let key_size = file::read_size(file_mut);
+            debug!("Key size:{}", key_size);
+
+            file::seek_value_size_post_read_key_size(file_mut);
+            let value_size = file::read_size(file_mut);
+            debug!("Value size:{}", value_size);
+
+            file::seek_key(file_mut, key_size);
+            let key = file::read_key(file_mut, key_size);
+            debug!("Key: {}", key);
+
+            let key_check = &key;
+            is_key_found = key_to_find == key_check;
+
+            debug!("Comparing {} == {}?: {}", key_to_find, key_check, is_key_found);
+            debug!("To find bytes: {:?} ; key bytes: {:?}", key_to_find.to_string().into_bytes(), key_check.to_string().into_bytes());
+
+            let position_of_next_key = file::seek_value(file_mut, value_size, key_size);
+            debug!("Seeked");
+
+            if is_key_found {
+                //OLD-TODO this minus one I think comes because the bds-c writer i think is writing some new lines, so if I fix this, I should probably eventually remove this minus one eventually.
+                //TODO Further investigation, it seems when you pipe values or use echo in to a command, it inclued a new line, which the bds-c writes in.
+                let value_found = file::read_key(file_mut, value_size-1);
+                debug!("Value found:'{}'", value_found);
+                //println!("{}", value_found);
+                //option_val = Option::Some(value_found.to_string());
+                option_val = Option::Some(value_found);
+                break;
+            } else if position_of_next_key == 0 {
+                option_val = Option::None;
+                break;
+            }
+        };
+        option_val
     }
 
     pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut Stdin) {

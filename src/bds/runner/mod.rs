@@ -1,13 +1,39 @@
 use super::file;
 use std::io;
+use std::fs;
 
 //TODO do this in a smart way
 //const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store";
 //const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
-const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
+//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
+const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v7_store";
 
+fn create_file_if_not_exist(kv_file_path_str: &str) {
+    /*
+    let kv_file_path_metadata = match fs::metadata(kv_file_path_str) {
+        Err(why) => panic!("Couldn't get file matadata. Err: {}", why),
+        Ok(file_metadata) => file_metadata
+    };
+    if !kv_file_path_metadata.is_file() && !kv_file_path_metadata.is_dir() {
+        match fs::File::create(kv_file_path_str) {
+            Err(why) => panic!("Couldn't create file. Err: {}", why),
+            _ => {}
+        }
+    }
+    */
+    match fs::metadata(kv_file_path_str) {
+        Err(_) => {
+            match fs::File::create(kv_file_path_str) {
+                Err(why) => panic!("Couldn't create file. Err: {}", why),
+                _ => {}
+            }
+        },
+        _ => {}
+    };
+}
 
 pub fn reading(read_args: Vec<String>) {
+    create_file_if_not_exist(KV_FILE);
     debug!("Will be reading with args: {:?}", read_args);
     let key_to_find = read_args.get(0).unwrap();
 
@@ -20,6 +46,7 @@ pub fn reading(read_args: Vec<String>) {
 }
 
 pub fn writing(write_args: Vec<String>) {
+    create_file_if_not_exist(KV_FILE);
     let key_to_write = write_args.get(0).unwrap();
     let mut stdin = &mut io::stdin();
 

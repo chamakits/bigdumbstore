@@ -47,14 +47,17 @@ impl BdsFile {
     pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
         let file_mut = &mut self.bds_file;
         //file::seek_end(file_mut);
-        BdsFile::seek_with(file_mut, SEEK_GOTO_END);
+        let pos = BdsFile::seek_with(file_mut, SEEK_GOTO_END);
+        debug!("Position after reading to end: {}", pos);
+        if pos == 0 {
+            panic!("File found, but is empty. Cannot look for: [{}]", key_to_find);
+        }
         let mut is_key_found = false;
         let mut option_val:Option<String> = Option::None;
         while !is_key_found {
 
             debug!("About to seek key_size");
             let pos = BdsFile::seek_with(file_mut, SEEK_KEY_SIZE);
-
             if pos == 0 {
                 error!("Error! It seems this file is malformed, and only contains size for a first key");
             }

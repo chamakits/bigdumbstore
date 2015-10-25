@@ -32,12 +32,19 @@ fn create_directories_if_needed(path: &Path) {
     };
 }
 
-pub fn reading(read_args: Vec<String>) {
-    create_file_if_not_exist(KV_FILE);
-    debug!("Will be reading with args: {:?}", read_args);
+pub fn reading(read_args: Vec<String>, path: Option<String>) {
+
+    let path_str: String = match path {
+        Option::Some(_path_str) => _path_str.to_string(),
+        Option::None => KV_FILE.to_string()
+    };
+    
+    debug!("Will be reading with args: {:?}, path: {:?}", read_args, path_str);    
+    create_file_if_not_exist(&path_str);
+
     let key_to_find = read_args.get(0).unwrap();
 
-    let mut bds = file::BdsFile::new_read(KV_FILE);
+    let mut bds = file::BdsFile::new_read(&path_str);
 
     let value_found = bds.find_value_by_key(key_to_find);
     if value_found.is_some() {
@@ -45,11 +52,17 @@ pub fn reading(read_args: Vec<String>) {
     }
 }
 
-pub fn writing(write_args: Vec<String>) {
-    create_file_if_not_exist(KV_FILE);
+pub fn writing(write_args: Vec<String>, path: Option<String>) {
+
+    let path_str: String = match path {
+        Option::Some(_path_str) => _path_str.to_string(),
+        Option::None => KV_FILE.to_string()
+    };
+    
+    create_file_if_not_exist(&path_str);
     let key_to_write = write_args.get(0).unwrap();
     let mut stdin = &mut io::stdin();
 
-    let mut bds = file::BdsFile::new_write(KV_FILE);
+    let mut bds = file::BdsFile::new_write(&path_str);
     bds.write_to_key_from_stdin(key_to_write, stdin);
 }

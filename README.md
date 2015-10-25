@@ -4,18 +4,18 @@ Reimplementation of the 'bigdumbstore' I began to do in C some time back, but wi
 ## Building
 
 ```
-    cargo build --release
+cargo build --release
 ```
 
 ## Writing
 
 ```
-    echo "this is a value" | ./target/release/bigdumbstore p a-key
+echo "this is a value" | ./target/release/bigdumbstore p a-key
 ```
 
 ## Reading
 
 ```
-    ./target/release/bigdumbstore g a-key
-    > this is a value
+./target/release/bigdumbstore g a-key
+> this is a value
 ```

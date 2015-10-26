@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::env;
 
 // TODO do this in a smart way
-const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v8_store";
+const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v9_store";
 
 fn create_file_if_not_exist(kv_file_path_str: &str) {
     let kv_file_path = Path::new(kv_file_path_str);

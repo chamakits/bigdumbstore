@@ -5,19 +5,55 @@ use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
 use std::io::Stdin;
+use bit_vec::BitVec;
 
 // TODO change everything in this file from i32 to i64
 
-// S Open file
 // TODO do this in a smart way
 const BUFF_SIZE: usize = 1024;
-// E Open file
+const VALUE_ENTRY_MAX_SIZE: usize = 999;
 
-// S converting to BdsFile
+pub struct MetaData {
+    is_final: bool,
+}
+
+impl MetaData {
+    pub fn new(bit_vec: BitVec) -> MetaData {
+        MetaData {
+            is_final:  bit_vec.get(7).unwrap(),
+        }
+    }
+    pub fn new_final() -> MetaData {
+        MetaData {
+            is_final:  true,
+        }
+    }
+    pub fn new_not_final() -> MetaData {
+        MetaData {
+            is_final:  false,
+        }
+    }
+
+    pub fn to_bit_vec(&self) -> BitVec {
+        let mut bit_vec = BitVec::from_elem(8, false);
+        bit_vec.set(7, self.is_final);
+        debug!("to_bit_vec: {:?}", bit_vec);
+        bit_vec
+    }
+
+    pub fn write_format(&self) -> String {
+        match String::from_utf8(self.to_bit_vec().to_bytes()) {
+            Ok(string) => string,
+            Err(why) => panic!("Could not get string. Err: [{}]", why),
+        }
+    }
+}
+
 pub struct BdsFile {
     bds_file: File,
 }
 const SEEK_GOTO_END: SeekFrom = SeekFrom::End(0);
+const SEEK_META_DATA: SeekFrom = SeekFrom::Current(-1);
 const SEEK_KEY_SIZE: SeekFrom = SeekFrom::Current(-3);
 const SEEK_VALUE_SIZE_POST_READ_KEY_SIZE: SeekFrom = SeekFrom::Current(-6);
 
@@ -49,7 +85,7 @@ impl BdsFile {
         let mut is_key_found = false;
         let mut option_val: Option<String> = Option::None;
         while !is_key_found {
-
+            let metadata = BdsFile::read_metadata(file_mut);
             let key_size = BdsFile::read_key_size(file_mut);
             let value_size = BdsFile::read_value_size(file_mut);
             let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
@@ -82,6 +118,29 @@ impl BdsFile {
         if pos == 0 {
             panic!("File found, but is empty. Cannot look for: [{}]",
                    key_to_find);
+        }
+    }
+
+    fn read_metadata(file_mut: &mut File) -> MetaData {
+        BdsFile::seek_metadata(file_mut);
+        let mut metadata_buffer = [0; 1];
+        BdsFile::read_metadata_into_bytes(file_mut, &mut metadata_buffer);
+        let bit_vec = BitVec::from_bytes(&metadata_buffer);
+        MetaData::new(bit_vec)
+    }
+
+    fn seek_metadata(file_mut: &mut File) {
+        let pos = BdsFile::seek_with(file_mut, SEEK_META_DATA);
+        if pos == 0 {
+            error!("Error! It seems this file is malformed, and only metadata for a first key");
+        }
+    }
+
+    fn read_metadata_into_bytes(file: &mut File, buffer_to_read: &mut [u8]) {
+        //buffer_to_read[0] = 1;
+        match file.read(buffer_to_read) {
+            Err(why) => panic!("Could not read size bytes. Err:{}", why),
+            _ => {}
         }
     }
 
@@ -120,16 +179,39 @@ impl BdsFile {
     pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut Stdin) {
         let mut string_in = &mut String::with_capacity(BUFF_SIZE);
         let _stdin_read_size = stdin.read_to_string(string_in);
+        debug!("_stdin_read_size:{:?}, string_in.len:{}, BUFF_SIZE:{}",
+               _stdin_read_size, string_in.len(), BUFF_SIZE);
+        
         let stdin_read_size = _stdin_read_size.unwrap();
         string_in.truncate(stdin_read_size);
 
-        debug!("Read from input:{}", string_in);
-
-        self.write_key_value(key, string_in, stdin_read_size);
+        self.write_to_key(key, string_in, stdin_read_size);
     }
 
-    fn write_key_value(&mut self, key: &str, value: &str, stdin_read_size: usize) {
-        let to_write = format!("{}{}{:03}{:03}", value, key, stdin_read_size, key.len());
+    fn write_to_key(&mut self, key: &str, string_in: &str, stdin_read_size: usize) {
+        if stdin_read_size > VALUE_ENTRY_MAX_SIZE {
+            let split_val = string_in.split_at(VALUE_ENTRY_MAX_SIZE);
+
+            let first_half = split_val.0;
+            let second_half = split_val.1;
+
+            let metadata = MetaData::new_not_final();
+            self.write_key_value(key, first_half, metadata, first_half.len());
+            self.write_to_key(key, second_half, second_half.len());
+        } else {
+            let metadata = MetaData::new_final();
+            debug!("Read from input:{}", string_in);
+            self.write_key_value(key, string_in, metadata, stdin_read_size);   
+        }
+    }
+
+    fn write_key_value(&mut self, key: &str, value: &str,
+                       metadata: MetaData, stdin_read_size: usize) {
+        debug!("Will get string to write.");
+        let to_write = format!(
+            "{}{}{:03}{:03}{}",
+            value, key, stdin_read_size, key.len(), metadata.write_format());
+        debug!("Will write:{}.", to_write);
 
         debug!("to_write = {}", to_write);
 
@@ -186,4 +268,3 @@ impl BdsFile {
         seeked_value
     }
 }
-// E converting to BdsFile

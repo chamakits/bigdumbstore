@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate bit_vec;
 
 use std::env;
 mod bds;

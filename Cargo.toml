@@ -54,3 +54,4 @@ authors = ["Omar Ferrer <omar.ferrer.uprm@gmail.com>"]
 [dependencies]
 log = "0.3.2"
 env_logger = "0.3.1"
+bit-vec = "0.4.2"

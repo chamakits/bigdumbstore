@@ -52,14 +52,13 @@ impl BdsFile {
 
             let key_size = BdsFile::read_key_size(file_mut);
             let value_size = BdsFile::read_value_size(file_mut);
-            let key = BdsFile::read_key_string(file_mut, key_size);
-            let key_check = &key;
+            let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
 
-            is_key_found = key_to_find == key_check;
+            is_key_found = key_to_find == key_to_check;
 
             debug!("Comparing {} == {}?: {}",
                    key_to_find,
-                   key_check,
+                   key_to_check,
                    is_key_found);
 
             let position_of_next_key = BdsFile::seek_value(file_mut, value_size, key_size);

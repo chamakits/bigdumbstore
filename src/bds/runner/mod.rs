@@ -95,7 +95,7 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) {
 
     let mut bds = file::BdsFile::new_read(&path_str);
 
-    let value_found = bds.find_value_by_key(key_to_find);
+    let value_found = bds.find_value_by_key_from_beginning(key_to_find);
     if value_found.is_some() {
         println!("{}", value_found.unwrap());
     }

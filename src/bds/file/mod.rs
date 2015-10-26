@@ -13,8 +13,9 @@ use bit_vec::BitVec;
 const BUFF_SIZE: usize = 1024;
 const VALUE_ENTRY_MAX_SIZE: usize = 999;
 
+#[derive(Debug)]
 pub struct MetaData {
-    is_final: bool,
+    pub is_final: bool,
 }
 
 impl MetaData {
@@ -49,6 +50,7 @@ impl MetaData {
     }
 }
 
+#[derive(Debug)]
 pub struct BdsFile {
     bds_file: File,
 }
@@ -56,6 +58,7 @@ const SEEK_GOTO_END: SeekFrom = SeekFrom::End(0);
 const SEEK_META_DATA: SeekFrom = SeekFrom::Current(-1);
 const SEEK_KEY_SIZE: SeekFrom = SeekFrom::Current(-3);
 const SEEK_VALUE_SIZE_POST_READ_KEY_SIZE: SeekFrom = SeekFrom::Current(-6);
+const SKIP_MAX_ENTRY_VALUE: SeekFrom = SeekFrom::Current(-(VALUE_ENTRY_MAX_SIZE as i64));
 
 impl BdsFile {
     pub fn new_read(file_path: &str) -> BdsFile {
@@ -78,14 +81,20 @@ impl BdsFile {
         BdsFile { bds_file: file }
     }
 
-    pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
+    pub fn find_value_by_key_from_beginning(&mut self, key_to_find: &str) -> Option<String> {
         let file_mut = &mut self.bds_file;
-
         BdsFile::seek_start_of_file_fail_if_empty(file_mut, key_to_find);
+        BdsFile::find_value_by_key(file_mut, key_to_find)
+    }
+    
+    fn find_value_by_key(file_mut: &mut File, key_to_find: &str) -> Option<String> {
+        //let file_mut = &mut self.bds_file;
         let mut is_key_found = false;
         let mut option_val: Option<String> = Option::None;
         while !is_key_found {
             let metadata = BdsFile::read_metadata(file_mut);
+            debug!("Metadata found: {:?}", metadata);
+            BdsFile::seek_with(file_mut, SEEK_META_DATA);
             let key_size = BdsFile::read_key_size(file_mut);
             let value_size = BdsFile::read_value_size(file_mut);
             let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
@@ -102,7 +111,24 @@ impl BdsFile {
             if is_key_found {
                 // TODO Further investigation, it seems when you pipe values or use echo in to
                 // a command, it inclued a new line, which the bds-c writes in.
-                option_val = BdsFile::read_value_string_option(file_mut, value_size);
+                match metadata.is_final {
+                    true =>
+                        option_val = BdsFile::read_value_string_option(file_mut, value_size),
+                    false => {
+                        option_val = BdsFile::read_value_string_option(file_mut, value_size);
+                        // /*
+                        let pos = BdsFile::seek_with(file_mut, SKIP_MAX_ENTRY_VALUE);
+                        if pos == 0 {
+                            panic!("Malformed file.  Marked value as unterminated, but reached file end for key to find: [{}]",
+                                   key_to_find);
+                        }
+                        debug!("Skipping full value as it is not terminated, after reading: {}", pos);
+                         //*/
+                        option_val = BdsFile::concat_option_strings(
+                            BdsFile::find_value_by_key(file_mut, key_to_find),
+                            option_val);
+                    },
+                }
                 break;
             } else if position_of_next_key == 0 {
                 option_val = Option::None;
@@ -110,6 +136,20 @@ impl BdsFile {
             }
         }
         option_val
+    }
+
+    fn concat_option_strings(left: Option<String>, right: Option<String>) -> Option<String> {
+        let left_string = match left {
+            Some(string) => string,
+            None => "".to_string(),
+        };
+
+        let right_string = match right {
+            Some(string) => string,
+            None => "".to_string(),
+        };
+
+        Option::Some(format!("{}{}", left_string, right_string))
     }
     
     fn seek_start_of_file_fail_if_empty(file_mut: &mut File, key_to_find: &str) {
@@ -124,6 +164,7 @@ impl BdsFile {
     fn read_metadata(file_mut: &mut File) -> MetaData {
         BdsFile::seek_metadata(file_mut);
         let mut metadata_buffer = [0; 1];
+        debug!("metadata_buffer: {:?}", metadata_buffer);
         BdsFile::read_metadata_into_bytes(file_mut, &mut metadata_buffer);
         let bit_vec = BitVec::from_bytes(&metadata_buffer);
         MetaData::new(bit_vec)
@@ -147,6 +188,7 @@ impl BdsFile {
     fn read_key_size(file_mut: &mut File) -> i64 {
         debug!("About to seek key_size");
         let pos = BdsFile::seek_with(file_mut, SEEK_KEY_SIZE);
+        debug!("Position after seeking: {}", pos);
         if pos == 0 {
             error!("Error! It seems this file is malformed, and only contains size for a first key");
         }
@@ -170,6 +212,7 @@ impl BdsFile {
     }
 
     fn read_value_string_option(file_mut: &mut File, value_size: i64) -> Option<String> {
+        //TODO this minus one may bring issues
         let value_found = BdsFile::read_key(file_mut, value_size - 1);
         debug!("Value found:'{}'", value_found);
         let option_val = Option::Some(value_found);
@@ -185,21 +228,23 @@ impl BdsFile {
         let stdin_read_size = _stdin_read_size.unwrap();
         string_in.truncate(stdin_read_size);
 
-        self.write_to_key(key, string_in, stdin_read_size);
+        self.write_to_key(key, string_in, stdin_read_size, MetaData::new_final());
     }
 
-    fn write_to_key(&mut self, key: &str, string_in: &str, stdin_read_size: usize) {
+    fn write_to_key(&mut self, key: &str, string_in: &str,
+                    stdin_read_size: usize, metadata: MetaData) {
         if stdin_read_size > VALUE_ENTRY_MAX_SIZE {
             let split_val = string_in.split_at(VALUE_ENTRY_MAX_SIZE);
 
             let first_half = split_val.0;
             let second_half = split_val.1;
-
-            let metadata = MetaData::new_not_final();
+            
+            //let metadata = MetaData::new_not_final();
             self.write_key_value(key, first_half, metadata, first_half.len());
-            self.write_to_key(key, second_half, second_half.len());
+            self.write_to_key(key, second_half, second_half.len(),
+                              MetaData::new_not_final());
         } else {
-            let metadata = MetaData::new_final();
+            //let metadata = MetaData::new_final();
             debug!("Read from input:{}", string_in);
             self.write_key_value(key, string_in, metadata, stdin_read_size);   
         }
@@ -234,8 +279,10 @@ impl BdsFile {
             Err(why) => panic!("Could not read size bytes. Err:{}", why),
             _ => {}
         }
-        let res = match String::from_utf8_lossy(&mut size_buffer).to_mut().parse::<i64>() {
-            Err(why) => panic!("Could not conver size to read to int. Err:{}", why),
+        let mut size_str = String::from_utf8_lossy(&mut size_buffer);
+        debug!("Will try to convert size found: {}", size_str);
+        let res = match size_str.to_mut().parse::<i64>() {
+            Err(why) => panic!("Could not convert size to read to int [{}]. Err:{}", size_str, why),
             Ok(size_read) => size_read,
         };
         return res;

@@ -6,16 +6,6 @@ use std::path::PathBuf;
 use std::env;
 
 // TODO do this in a smart way
-// const KV_FILE: &'static str =
-// "/home/chamakits/.config/big-dumb-store/.v6_store";
-// const KV_FILE: &'static str =
-// "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
-// const KV_FILE: &'static str =
-// "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
-// const KV_FILE: &'static str =
-// "/home/chamakits/.config/big-dumb-store/.v7_store";
-// const KV_FILE: &'static str =
-// "/home/chamakits/.config-2/big-dumb-store/.v7_store";
 const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v8_store";
 
 fn create_file_if_not_exist(kv_file_path_str: &str) {
@@ -81,7 +71,7 @@ fn create_directories_if_needed(path: &Path) -> String {
 
     match fs::create_dir_all(&resolve_path_for_home) {
         Err(why) => panic!("Couldn't create directory path {:?}: error:{}", path, why),
-    Ok(_) => {}
+        Ok(_) => {}
     }
 
     return resolve_path_for_home.to_str().unwrap().to_string();
@@ -115,7 +105,7 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
-    Option::None => KV_FILE.to_string(),
+        Option::None => KV_FILE.to_string(),
     };
 
     path_str = path_with_curly_to_abs(&path_str).to_str().unwrap().to_string();

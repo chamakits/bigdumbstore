@@ -44,59 +44,77 @@ impl BdsFile {
 
     pub fn find_value_by_key(&mut self, key_to_find: &str) -> Option<String> {
         let file_mut = &mut self.bds_file;
-        // file::seek_end(file_mut);
-        let pos = BdsFile::seek_with(file_mut, SEEK_GOTO_END);
-        debug!("Position after reading to end: {}", pos);
-        if pos == 0 {
-            panic!("File found, but is empty. Cannot look for: [{}]",
-                   key_to_find);
-        }
+
+        BdsFile::seek_start_of_file_fail_if_empty(file_mut, key_to_find);
         let mut is_key_found = false;
         let mut option_val: Option<String> = Option::None;
         while !is_key_found {
 
-            debug!("About to seek key_size");
-            let pos = BdsFile::seek_with(file_mut, SEEK_KEY_SIZE);
-            if pos == 0 {
-                error!("Error! It seems this file is malformed, and only contains size for a first key");
-            }
-            let key_size = BdsFile::read_size(file_mut);
-            debug!("Key size:{}", key_size);
-
-            BdsFile::seek_with(file_mut, SEEK_VALUE_SIZE_POST_READ_KEY_SIZE);
-            let value_size = BdsFile::read_size(file_mut);
-            debug!("Value size:{}", value_size);
-
-            BdsFile::seek_key(file_mut, key_size);
-            let key = BdsFile::read_key(file_mut, key_size);
-            debug!("Key: {}", key);
-
+            let key_size = BdsFile::read_key_size(file_mut);
+            let value_size = BdsFile::read_value_size(file_mut);
+            let key = BdsFile::read_key_string(file_mut, key_size);
             let key_check = &key;
+
             is_key_found = key_to_find == key_check;
 
             debug!("Comparing {} == {}?: {}",
                    key_to_find,
                    key_check,
                    is_key_found);
-            debug!("To find bytes: {:?} ; key bytes: {:?}",
-                   key_to_find.to_string().into_bytes(),
-                   key_check.to_string().into_bytes());
 
             let position_of_next_key = BdsFile::seek_value(file_mut, value_size, key_size);
-            debug!("Seeked");
 
             if is_key_found {
                 // TODO Further investigation, it seems when you pipe values or use echo in to
                 // a command, it inclued a new line, which the bds-c writes in.
-                let value_found = BdsFile::read_key(file_mut, value_size - 1);
-                debug!("Value found:'{}'", value_found);
-                option_val = Option::Some(value_found);
+                option_val = BdsFile::read_value_string_option(file_mut, value_size);
                 break;
             } else if position_of_next_key == 0 {
                 option_val = Option::None;
                 break;
             }
         }
+        option_val
+    }
+    
+    fn seek_start_of_file_fail_if_empty(file_mut: &mut File, key_to_find: &str) {
+        let pos = BdsFile::seek_with(file_mut, SEEK_GOTO_END);
+        debug!("Position after reading to end: {}", pos);
+        if pos == 0 {
+            panic!("File found, but is empty. Cannot look for: [{}]",
+                   key_to_find);
+        }
+    }
+
+    fn read_key_size(file_mut: &mut File) -> i64 {
+        debug!("About to seek key_size");
+        let pos = BdsFile::seek_with(file_mut, SEEK_KEY_SIZE);
+        if pos == 0 {
+            error!("Error! It seems this file is malformed, and only contains size for a first key");
+        }
+        let key_size = BdsFile::read_size(file_mut);
+        debug!("Key size:{}", key_size);
+        return key_size;
+    }
+
+    fn read_value_size(file_mut: &mut File) -> i64 {
+        BdsFile::seek_with(file_mut, SEEK_VALUE_SIZE_POST_READ_KEY_SIZE);
+        let value_size = BdsFile::read_size(file_mut);
+        debug!("Value size:{}", value_size);
+        value_size
+    }
+
+    fn read_key_string(file_mut: &mut File, key_size: i64) -> String {
+        BdsFile::seek_key(file_mut, key_size);
+        let key = BdsFile::read_key(file_mut, key_size);
+        debug!("Key: {}", key);
+        key
+    }
+
+    fn read_value_string_option(file_mut: &mut File, value_size: i64) -> Option<String> {
+        let value_found = BdsFile::read_key(file_mut, value_size - 1);
+        debug!("Value found:'{}'", value_found);
+        let option_val = Option::Some(value_found);
         option_val
     }
 
@@ -163,7 +181,10 @@ impl BdsFile {
     }
 
     fn seek_value(file: &mut File, value_size: i64, key_size: i64) -> u64 {
-        BdsFile::seek_with(file, SeekFrom::Current(-(value_size + key_size)))
+        let seeked_value =
+            BdsFile::seek_with(file, SeekFrom::Current(-(value_size + key_size)));
+        debug!("Seeked");
+        seeked_value
     }
 }
 // E converting to BdsFile

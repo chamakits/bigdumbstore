@@ -5,12 +5,17 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::env;
 
-//TODO do this in a smart way
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store";
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
-//const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v7_store";
-//const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v7_store";
+// TODO do this in a smart way
+// const KV_FILE: &'static str =
+// "/home/chamakits/.config/big-dumb-store/.v6_store";
+// const KV_FILE: &'static str =
+// "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
+// const KV_FILE: &'static str =
+// "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
+// const KV_FILE: &'static str =
+// "/home/chamakits/.config/big-dumb-store/.v7_store";
+// const KV_FILE: &'static str =
+// "/home/chamakits/.config-2/big-dumb-store/.v7_store";
 const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v8_store";
 
 fn create_file_if_not_exist(kv_file_path_str: &str) {
@@ -20,29 +25,30 @@ fn create_file_if_not_exist(kv_file_path_str: &str) {
 
     match fs::metadata(kv_file_path_str) {
         Err(_) => {
-            let kv_path_dirs_created =
-                create_directories_if_needed(kv_file_path.parent().unwrap());
+            let kv_path_dirs_created = create_directories_if_needed(kv_file_path.parent().unwrap());
             let kv_path_joined = Path::new(&kv_path_dirs_created)
                 .join(kv_file_path.file_name().unwrap());
             debug!("kv_path_dirs_created: {:?}", kv_path_joined);
             match fs::File::create(kv_path_joined) {
                 Err(why) => panic!("Couldn't create file. Err: {}, for path: {}",
-                                   why, kv_file_path_str),
+                                   why,
+                                   kv_file_path_str),
                 _ => {}
             }
-        },
+        }
         _ => {}
-    };
+    }
 }
 
 fn path_with_curly_to_abs(path_maybe_with_curly: &str) -> PathBuf {
     let resolve_path_for_home = match path_maybe_with_curly.split_at(1) {
-        ("~",x) => {
+        ("~", x) => {
             let rest_of_path = x.split_at(1).1;
             debug!("Found home directory, file:{}, {:?}",
-                   x, env::home_dir().unwrap().join(Path::new(rest_of_path)));
+                   x,
+                   env::home_dir().unwrap().join(Path::new(rest_of_path)));
             env::home_dir().unwrap().join(Path::new(rest_of_path))
-        },
+        }
         _ => {
             debug!("Not a home directory specified");
             Path::new(path_maybe_with_curly).to_path_buf()
@@ -58,25 +64,25 @@ fn create_directories_if_needed(path: &Path) -> String {
     if path_str.len() == 0 {
         return path_str.to_string();
     }
-    /*
-    let resolve_path_for_home = match path_str.split_at(1) {
-        ("~",x) => {
-            debug!("Found home directory");
-            env::home_dir().unwrap().join(Path::new(x))
-        },
-        _ => {
-            debug!("Not a home directory specified");
-            path.to_path_buf()
-        }
-    };
-    */
+    //
+    // let resolve_path_for_home = match path_str.split_at(1) {
+    // ("~",x) => {
+    // debug!("Found home directory");
+    // env::home_dir().unwrap().join(Path::new(x))
+    // },
+    // _ => {
+    // debug!("Not a home directory specified");
+    // path.to_path_buf()
+    // }
+    // };
+    //
     let resolve_path_for_home = path_with_curly_to_abs(path_str);
     debug!("resolve_path_for_home: {:?}", resolve_path_for_home);
 
     match fs::create_dir_all(&resolve_path_for_home) {
         Err(why) => panic!("Couldn't create directory path {:?}: error:{}", path, why),
-        Ok(_) => {},
-    };
+    Ok(_) => {}
+    }
 
     return resolve_path_for_home.to_str().unwrap().to_string();
 }
@@ -85,12 +91,14 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
-        Option::None => KV_FILE.to_string()
+        Option::None => KV_FILE.to_string(),
     };
 
     path_str = path_with_curly_to_abs(&path_str).to_str().unwrap().to_string();
-    
-    debug!("Will be reading with args: {:?}, path: {:?}", read_args, path_str);    
+
+    debug!("Will be reading with args: {:?}, path: {:?}",
+           read_args,
+           path_str);
     create_file_if_not_exist(&path_str);
 
     let key_to_find = read_args.get(0).unwrap();
@@ -107,13 +115,15 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
-        Option::None => KV_FILE.to_string()
+    Option::None => KV_FILE.to_string(),
     };
 
     path_str = path_with_curly_to_abs(&path_str).to_str().unwrap().to_string();
 
-    debug!("Will be writing with args: {:?}, path: {:?}", write_args, path_str);
-    
+    debug!("Will be writing with args: {:?}, path: {:?}",
+           write_args,
+           path_str);
+
     create_file_if_not_exist(&path_str);
     let key_to_write = write_args.get(0).unwrap();
     let mut stdin = &mut io::stdin();

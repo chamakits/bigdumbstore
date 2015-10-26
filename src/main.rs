@@ -1,11 +1,12 @@
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate env_logger;
 
 use std::env;
 mod bds;
 
 use bds::mode;
-use bds::mode::{Mode};
+use bds::mode::Mode;
 use bds::runner;
 
 fn main() {
@@ -20,5 +21,5 @@ fn main() {
         Mode::Write(args, path) => runner::writing(args, path),
         x => panic!("Parameter given is invalid. Args:{:?}", x),
     }
-    
+
 }

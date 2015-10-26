@@ -13,3 +13,6 @@
 
 # emacs stuff
 *~
+
+# rustfmt backup
+*.rs.bk

@@ -10,7 +10,8 @@ use std::env;
 //const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust";
 //const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v6_store_rust_struct";
 //const KV_FILE: &'static str = "/home/chamakits/.config/big-dumb-store/.v7_store";
-const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v7_store";
+//const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v7_store";
+const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v8_store";
 
 fn create_file_if_not_exist(kv_file_path_str: &str) {
     let kv_file_path = Path::new(kv_file_path_str);

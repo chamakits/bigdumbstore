@@ -58,7 +58,6 @@ const SEEK_GOTO_END: SeekFrom = SeekFrom::End(0);
 const SEEK_META_DATA: SeekFrom = SeekFrom::Current(-1);
 const SEEK_KEY_SIZE: SeekFrom = SeekFrom::Current(-3);
 const SEEK_VALUE_SIZE_POST_READ_KEY_SIZE: SeekFrom = SeekFrom::Current(-6);
-const SKIP_MAX_ENTRY_VALUE: SeekFrom = SeekFrom::Current(-(VALUE_ENTRY_MAX_SIZE as i64));
 
 impl BdsFile {
     pub fn new_read(file_path: &str) -> BdsFile {
@@ -117,7 +116,15 @@ impl BdsFile {
                     false => {
                         option_val = BdsFile::read_value_string_option(file_mut, value_size);
                         // /*
-                        let pos = BdsFile::seek_with(file_mut, SKIP_MAX_ENTRY_VALUE);
+                        //let pos = BdsFile::seek_with(file_mut, SKIP_MAX_ENTRY_VALUE+value_size);
+                        /*
+                        let pos = BdsFile::seek_with(
+                            file_mut,
+                            SeekFrom::Current(-((VALUE_ENTRY_MAX_SIZE +value_size as usize) as i64)));
+                        */
+                        let pos = BdsFile::seek_with(
+                            file_mut,
+                            SeekFrom::Current(-(((value_size - 1) as usize) as i64)));
                         if pos == 0 {
                             panic!("Malformed file.  Marked value as unterminated, but reached file end for key to find: [{}]",
                                    key_to_find);

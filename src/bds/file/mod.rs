@@ -17,7 +17,9 @@ const VALUE_ENTRY_MAX_SIZE: usize = 999;
 pub struct MetaData {
     pub is_final: bool,
 }
-//static mut lookup_count: u64 = 0;
+//TODO remove this, its just whil debugging
+static mut lookup_count: u64 = 0;
+static mut skip_count: u64 = 0;
 impl MetaData {
     pub fn new(bit_vec: BitVec) -> MetaData {
         MetaData {
@@ -97,16 +99,28 @@ impl BdsFile {
             BdsFile::seek_with(file_mut, SEEK_META_DATA);
             let key_size = BdsFile::read_key_size(file_mut);
             let value_size = BdsFile::read_value_size(file_mut);
+
+            //TODO confirm this logic holds and doesn't break the program.
+            //TODO DIFFERENT: Look into whether this comparison is worth it or not.
+            if key_size != key_to_find.len() as i64 {
+                BdsFile::seek_value(file_mut, value_size, 3+key_size);
+                //TODO remove this, its just whil debugging
+                unsafe {
+                    skip_count = skip_count + 1;
+                    info!("skip count: {}", skip_count);
+                }
+
+                continue;
+            }
             let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
 
             is_key_found = key_to_find == key_to_check;
 
-/*
+            //TODO remove this, its just whil debugging
             unsafe {
                 lookup_count = lookup_count + 1;
-                println!("Lookup count: {}", lookup_count);
+                info!("Lookup count: {}", lookup_count);
             }
-*/
 
             debug!("Comparing {} == {}?: {}",
                    key_to_find,

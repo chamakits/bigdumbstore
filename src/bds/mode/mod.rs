@@ -3,6 +3,7 @@ pub enum Mode {
     // TODO maybe change to be a key only instead of the whole vector
     Read(Vec<String>, Option<String>),
     Write(Vec<String>, Option<String>),
+    JunkWrite(Vec<String>),
     Invalid(Vec<String>),
 }
 
@@ -41,6 +42,13 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
                 Mode::Write(read_val, path_kv_file)
             }
             // E
+        }
+        "j" => {
+            let mut read_val: Vec<String> = arguments.to_vec();
+            read_val.remove(0);
+            read_val.remove(0);
+
+            Mode::JunkWrite(read_val)
         }
         x => {
             error!("Given argument is Invalid: {}", x);

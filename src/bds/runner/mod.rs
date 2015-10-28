@@ -4,6 +4,7 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::env;
+use std::char;
 
 // TODO do this in a smart way
 const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v9_store";
@@ -99,6 +100,35 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) {
     if value_found.is_some() {
         println!("{}", value_found.unwrap());
     }
+}
+
+const DEFAULT_KEY: &'static str = "default";
+pub fn junk_writing(write_args: Vec<String>) {
+    let path = "JunkKVFile";
+    create_file_if_not_exist(path);
+    let root_key = match write_args.get(0) {
+        Some(key) => format!("{}",key),
+        None => format!("{}",DEFAULT_KEY),
+    };
+    let mut bds = file::BdsFile::new_write(path);
+
+    let mut bigger_str = "".to_string();
+    let mut to_write:String;
+    
+    let a = 'a' as u32;
+    let outer = 25;
+    let inner = 25;
+    for i in 0..outer {
+        for j in 0..inner {
+            to_write = format!("Smaller!_BEFORE_{}{}_AFTER", char::from_u32(i+a).unwrap(), char::from_u32(j+a).unwrap());
+            bigger_str = bigger_str + &to_write;
+            let key = format!("{}_key_{}_{}", root_key, inner, outer);
+            bds.write_to_key_dynamic(&key, &to_write);
+            let bigger_again = "Bigger!".to_string() + &bigger_str;
+            bds.write_to_key_dynamic(&key, &bigger_again);
+        }
+    }
+    
 }
 
 pub fn writing(write_args: Vec<String>, path: Option<String>) {

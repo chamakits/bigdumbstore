@@ -20,6 +20,7 @@ fn main() {
     match run_mode {
         Mode::Read(args, path) => runner::reading(args, path),
         Mode::Write(args, path) => runner::writing(args, path),
+        Mode::JunkWrite(args) => runner::junk_writing(args),
         x => panic!("Parameter given is invalid. Args:{:?}", x),
     }
 

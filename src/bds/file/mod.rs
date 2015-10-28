@@ -243,6 +243,10 @@ impl BdsFile {
         }
     }
 
+    pub fn write_to_key_dynamic(&mut self, key: &str, value_in: &str) {
+        self.write_to_key(key, value_in, value_in.len(), MetaData::new_final())
+    }
+
     fn write_key_value(&mut self, key: &str, value: &str,
                        metadata: MetaData, stdin_read_size: usize) {
         debug!("Will get string to write.");

@@ -17,7 +17,7 @@ const VALUE_ENTRY_MAX_SIZE: usize = 999;
 pub struct MetaData {
     pub is_final: bool,
 }
-
+//static mut lookup_count: u64 = 0;
 impl MetaData {
     pub fn new(bit_vec: BitVec) -> MetaData {
         MetaData {
@@ -85,7 +85,8 @@ impl BdsFile {
         BdsFile::seek_start_of_file_fail_if_empty(file_mut, key_to_find);
         BdsFile::find_value_by_key(file_mut, key_to_find)
     }
-    
+
+    //static mut lookup_count: u64 = 0;
     fn find_value_by_key(file_mut: &mut File, key_to_find: &str) -> Option<String> {
         //let file_mut = &mut self.bds_file;
         let mut is_key_found = false;
@@ -99,6 +100,13 @@ impl BdsFile {
             let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
 
             is_key_found = key_to_find == key_to_check;
+
+/*
+            unsafe {
+                lookup_count = lookup_count + 1;
+                println!("Lookup count: {}", lookup_count);
+            }
+*/
 
             debug!("Comparing {} == {}?: {}",
                    key_to_find,
@@ -120,6 +128,7 @@ impl BdsFile {
                             panic!("Malformed file.  Marked value as unterminated, but reached file end for key to find: [{}]",
                                    key_to_find);
                         }
+                        //TODO currently doing recursion, not ideal, think of changing.
                         debug!("Skipping full value as it is not terminated, after reading: {}", pos);
                         option_val = BdsFile::concat_option_strings(
                             BdsFile::find_value_by_key(file_mut, key_to_find),
@@ -235,6 +244,7 @@ impl BdsFile {
             let second_half = split_val.1;
             
             self.write_key_value(key, first_half, metadata, first_half.len());
+            //TODO using recursion. Look into doing this without recursion.
             self.write_to_key(key, second_half, second_half.len(),
                               MetaData::new_not_final());
         } else {

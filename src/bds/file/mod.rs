@@ -124,7 +124,9 @@ impl BdsFile {
                         */
                         let pos = BdsFile::seek_with(
                             file_mut,
-                            SeekFrom::Current(-(((value_size - 1) as usize) as i64)));
+                            //TODO This negative 1 is likely because of the negative one issue I had before. Probably eating values and it is terrible maybe.
+                            //SeekFrom::Current(-(((value_size - 1) as usize) as i64)));
+                            SeekFrom::Current(-(((value_size) as usize) as i64)));
                         if pos == 0 {
                             panic!("Malformed file.  Marked value as unterminated, but reached file end for key to find: [{}]",
                                    key_to_find);
@@ -220,7 +222,8 @@ impl BdsFile {
 
     fn read_value_string_option(file_mut: &mut File, value_size: i64) -> Option<String> {
         //TODO this minus one may bring issues
-        let value_found = BdsFile::read_key(file_mut, value_size - 1);
+        //let value_found = BdsFile::read_key(file_mut, value_size - 1);
+        let value_found = BdsFile::read_key(file_mut, value_size);
         debug!("Value found:'{}'", value_found);
         let option_val = Option::Some(value_found);
         option_val

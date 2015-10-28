@@ -108,31 +108,19 @@ impl BdsFile {
             let position_of_next_key = BdsFile::seek_value(file_mut, value_size, key_size);
 
             if is_key_found {
-                // TODO Further investigation, it seems when you pipe values or use echo in to
-                // a command, it inclued a new line, which the bds-c writes in.
                 match metadata.is_final {
                     true =>
                         option_val = BdsFile::read_value_string_option(file_mut, value_size),
                     false => {
                         option_val = BdsFile::read_value_string_option(file_mut, value_size);
-                        // /*
-                        //let pos = BdsFile::seek_with(file_mut, SKIP_MAX_ENTRY_VALUE+value_size);
-                        /*
                         let pos = BdsFile::seek_with(
                             file_mut,
-                            SeekFrom::Current(-((VALUE_ENTRY_MAX_SIZE +value_size as usize) as i64)));
-                        */
-                        let pos = BdsFile::seek_with(
-                            file_mut,
-                            //TODO This negative 1 is likely because of the negative one issue I had before. Probably eating values and it is terrible maybe.
-                            //SeekFrom::Current(-(((value_size - 1) as usize) as i64)));
                             SeekFrom::Current(-(((value_size) as usize) as i64)));
                         if pos == 0 {
                             panic!("Malformed file.  Marked value as unterminated, but reached file end for key to find: [{}]",
                                    key_to_find);
                         }
                         debug!("Skipping full value as it is not terminated, after reading: {}", pos);
-                         //*/
                         option_val = BdsFile::concat_option_strings(
                             BdsFile::find_value_by_key(file_mut, key_to_find),
                             option_val);
@@ -187,7 +175,6 @@ impl BdsFile {
     }
 
     fn read_metadata_into_bytes(file: &mut File, buffer_to_read: &mut [u8]) {
-        //buffer_to_read[0] = 1;
         match file.read(buffer_to_read) {
             Err(why) => panic!("Could not read size bytes. Err:{}", why),
             _ => {}
@@ -221,8 +208,6 @@ impl BdsFile {
     }
 
     fn read_value_string_option(file_mut: &mut File, value_size: i64) -> Option<String> {
-        //TODO this minus one may bring issues
-        //let value_found = BdsFile::read_key(file_mut, value_size - 1);
         let value_found = BdsFile::read_key(file_mut, value_size);
         debug!("Value found:'{}'", value_found);
         let option_val = Option::Some(value_found);
@@ -249,12 +234,10 @@ impl BdsFile {
             let first_half = split_val.0;
             let second_half = split_val.1;
             
-            //let metadata = MetaData::new_not_final();
             self.write_key_value(key, first_half, metadata, first_half.len());
             self.write_to_key(key, second_half, second_half.len(),
                               MetaData::new_not_final());
         } else {
-            //let metadata = MetaData::new_final();
             debug!("Read from input:{}", string_in);
             self.write_key_value(key, string_in, metadata, stdin_read_size);   
         }
@@ -303,7 +286,6 @@ impl BdsFile {
     }
 
     fn read_key(file: &mut File, key_size: i64) -> String {
-        // TODO this is limited to only read data that fits in size. Improve
         let mut key_buffer = [0; BUFF_SIZE];
         let mut file_take = file.take(key_size as u64);
         match file_take.read(&mut key_buffer) {

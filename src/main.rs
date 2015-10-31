@@ -13,7 +13,8 @@ use bds::runner;
 fn main() {
     env_logger::init().unwrap();
 
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().collect();
+    let args = &mut args;
     debug!("Args: {:?}", args);
     let run_mode = mode::determine_mode(args);
     debug!("Run mode is: {:?}", run_mode);

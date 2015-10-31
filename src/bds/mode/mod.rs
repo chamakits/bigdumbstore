@@ -1,32 +1,33 @@
 #[derive(Debug)]
 pub enum Mode<'a> {
     // TODO maybe change to be a key only instead of the whole vector
-    Read(&'a Vec<String>, Option<String>),
-    Write(&'a Vec<String>, Option<String>),
-    JunkWrite(&'a Vec<String>),
-    Server(&'a Vec<String>),
-    Invalid(&'a Vec<String>),
+    Read(&'a [String], Option<String>),
+    Write(&'a [String], Option<String>),
+    JunkWrite(&'a [String]),
+    Server(&'a [String]),
+    Invalid(&'a [String]),
 }
 
 pub fn determine_mode<'a>(arguments: &'a mut Vec<String>) -> Mode {
 
-    let arg = {
-        let _arg = arguments.get_mut(1).unwrap().split_at(1);
-        (_arg.0, _arg.1)
+    let (first_arg, other_args) =  {
+        let (_1, _2) = arguments.split_at(1);
+        _2.split_at(1)
     };
-
+    debug!("first_arg: {:?}, other_args: {:?}", first_arg, other_args);
     
+    let arg = first_arg.get(0).unwrap().split_at(1);
     debug!("Arg split: {:?}", arg);
-    match arg.0 {
+    let arg_command = arg.0.unwrap();
+    match arg_command.as_ref() {
         "g" => {
             //let mut read_val: Vec<String> = arguments.to_vec();
-            let read_val = arguments;
-            read_val.remove(0);
-            read_val.remove(0);
+            let read_val = other_args.split_at(2).1;
             {
-                let _path_kv_file = arg.1.to_string();
+                let _path_kv_file = arg.1;
+                //*_path_kv_file + 1;
                 let path_kv_file = if _path_kv_file.len() > 0 {
-                    Option::Some(_path_kv_file)
+                    Option::Some(_path_kv_file.get(0).unwrap().to_string())
                 } else {
                     Option::None
                 };
@@ -35,15 +36,12 @@ pub fn determine_mode<'a>(arguments: &'a mut Vec<String>) -> Mode {
             }
         }
         "p" => {
-            //let mut read_val: Vec<String> = arguments.to_vec();
-            let read_val = arguments;
-            read_val.remove(0);
-            read_val.remove(0);
+            let read_val = other_args.split_at(2).1;
             // S
             {
-                let _path_kv_file = arg.1.to_string();
+                let _path_kv_file = arg.1;
                 let path_kv_file = if _path_kv_file.len() > 0 {
-                    Option::Some(_path_kv_file)
+                    Option::Some(_path_kv_file.get(0).unwrap().to_string())
                 } else {
                     Option::None
                 };
@@ -54,17 +52,13 @@ pub fn determine_mode<'a>(arguments: &'a mut Vec<String>) -> Mode {
         }
         "j" => {
             //let mut read_val: Vec<String> = arguments.to_vec();
-            let read_val = arguments;
-            read_val.remove(0);
-            read_val.remove(0);
+            let read_val = other_args.split_at(2).1;
 
             Mode::JunkWrite(read_val)
         }
         "s" => {
             //let mut read_val: Vec<String> = arguments.to_vec();
-            let read_val = arguments;
-            read_val.remove(0);
-            read_val.remove(0);
+            let read_val = other_args.split_at(2).1;
             Mode::Server(read_val)
         }
         x => {

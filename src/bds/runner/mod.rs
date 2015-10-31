@@ -78,7 +78,7 @@ fn create_directories_if_needed(path: &Path) -> String {
     return resolve_path_for_home.to_str().unwrap().to_string();
 }
 
-pub fn reading(read_args: &Vec<String>, path: Option<String>) {
+pub fn reading(read_args: &[String], path: Option<String>) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
@@ -103,7 +103,7 @@ pub fn reading(read_args: &Vec<String>, path: Option<String>) {
 }
 
 const DEFAULT_KEY: &'static str = "default";
-pub fn junk_writing(write_args: &Vec<String>) {
+pub fn junk_writing(write_args: &[String]) {
     let path = "JunkKVFile";
     create_file_if_not_exist(path);
     let root_key = match write_args.get(0) {
@@ -131,7 +131,7 @@ pub fn junk_writing(write_args: &Vec<String>) {
     
 }
 
-pub fn writing(write_args: &Vec<String>, path: Option<String>) {
+pub fn writing(write_args: &[String], path: Option<String>) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),

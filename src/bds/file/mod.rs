@@ -335,3 +335,38 @@ impl BdsFile {
         seeked_value
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_metadata_to_bit_vec() {
+        let mut metadata = MetaData::new_final();
+        assert_eq!(true, metadata.to_bit_vec().get(7).unwrap());
+        metadata = MetaData::new_not_final();
+        assert_eq!(false, metadata.to_bit_vec().get(7).unwrap());
+    }
+
+    fn string_from_u8(byte: u8) -> String {
+        let vec_slice = vec![byte as u8];
+        match String::from_utf8(vec_slice) {
+            Ok(res) => res,
+            Err(why) => panic!("Couldn't get string from vec_slice. Error: {}", why),
+        }
+    }
+    
+    #[test]
+    fn test_metadata_write_format() {
+        let metadata = MetaData::new_final();
+        let formatted_vec_slice = string_from_u8(1 as u8);
+        assert_eq!(formatted_vec_slice, metadata.write_format());
+
+        let metadata = MetaData::new_not_final();
+        let formatted_vec_slice = string_from_u8(0 as u8);
+        assert_eq!(formatted_vec_slice, metadata.write_format());
+    }
+
+}

@@ -342,6 +342,7 @@ impl BdsFile {
 mod tests {
     use super::*;
 
+    //MetaData tests
     #[test]
     fn test_metadata_to_bit_vec() {
         let mut metadata = MetaData::new_final();
@@ -367,6 +368,59 @@ mod tests {
         let metadata = MetaData::new_not_final();
         let formatted_vec_slice = string_from_u8(0 as u8);
         assert_eq!(formatted_vec_slice, metadata.write_format());
+    }
+
+    use tempdir::TempDir;
+    use std::path::Path;
+    use std::fs;
+
+    fn temp_file_path<'a>(tmp_dir: &'a TempDir) -> &'a Path {
+        tmp_dir.path()
+    }
+
+    //TODO this test needs to be cleaned up.
+    /*
+    Heres what's wrong. Either I don't get rust lifetimes and ownerships, 
+    or I'm not in sync with the 'rust way' of things.
+    Ideally, I'd LOVE to create a setup function, or something that would 
+    let me handle owenrship easily.
+
+    But big big problems.
+    TempDir lets me get a path with a matching lifetime. Fine.
+    When I do a join on that path, I get a PathBuf. Newly built with scope's lifetime.
+    So, then I try to get a string from it. It's an Option<'&str'> matching the PathBuf lifetime.
+    I guess I could 'to_string' it. But it seems weird that I'd need to do that.
+    I guess it's the new PathBuf creating the problem? Is this the right way to do it?
+    */
+    #[test]
+    fn test_new_write_and_read() {
+        let tmp_dir = TempDir::new("bds_kv_dir");
+        let tmp_dir = tmp_dir.unwrap();
+        let tmp_path_buff = temp_file_path(&tmp_dir)
+            .join("bds_kv_file");
+        let tmp_path_str = tmp_path_buff
+            .to_str()
+            .unwrap();
+
+        {
+            {
+                match fs::File::create(tmp_path_str) {
+                    Err(why) => panic!("Couldn't create file. Err: {}, for path: {}",
+                                       why,
+                                       tmp_path_str),
+                    _ => {}
+                }
+            }
+            let mut bds_file = BdsFile::new_write(tmp_path_str);
+            bds_file.write_to_key_dynamic("given_key", "given_value");
+        }
+
+        {
+            let mut bds_file = BdsFile::new_read(tmp_path_str);
+            let found_val = bds_file.find_value_by_key_from_beginning("given_key");
+            println!("Found val:{:?}", found_val);
+            assert_eq!(Option::Some("given_value".to_string()), found_val);
+        }
     }
 
 }

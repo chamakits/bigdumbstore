@@ -371,46 +371,32 @@ mod tests {
     }
 
     use tempdir::TempDir;
-    use std::path::Path;
     use std::fs;
 
-    fn temp_file_path<'a>(tmp_dir: &'a TempDir) -> &'a Path {
+    fn temp_file_path_string<'a>(tmp_dir: &'a TempDir) -> String {
         tmp_dir.path()
+            .join("bds_kv_file")
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 
+    fn create_kv_file(tmp_path_str: &str) {
+        match fs::File::create(tmp_path_str) {
+            Err(why) => panic!("Couldn't create file. Err: {}, for path: {}",
+                               why,
+                               tmp_path_str),
+            _ => {}
+        }
+    }
+    
     //TODO this test needs to be cleaned up.
-    /*
-    Heres what's wrong. Either I don't get rust lifetimes and ownerships, 
-    or I'm not in sync with the 'rust way' of things.
-    Ideally, I'd LOVE to create a setup function, or something that would 
-    let me handle owenrship easily.
-
-    But big big problems.
-    TempDir lets me get a path with a matching lifetime. Fine.
-    When I do a join on that path, I get a PathBuf. Newly built with scope's lifetime.
-    So, then I try to get a string from it. It's an Option<'&str'> matching the PathBuf lifetime.
-    I guess I could 'to_string' it. But it seems weird that I'd need to do that.
-    I guess it's the new PathBuf creating the problem? Is this the right way to do it?
-    */
     #[test]
     fn test_new_write_and_read() {
-        let tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_dir = tmp_dir.unwrap();
-        let tmp_path_buff = temp_file_path(&tmp_dir)
-            .join("bds_kv_file");
-        let tmp_path_str = tmp_path_buff
-            .to_str()
-            .unwrap();
-
+        let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
+        let tmp_path_str = &temp_file_path_string(&tmp_dir);
         {
-            {
-                match fs::File::create(tmp_path_str) {
-                    Err(why) => panic!("Couldn't create file. Err: {}, for path: {}",
-                                       why,
-                                       tmp_path_str),
-                    _ => {}
-                }
-            }
+            create_kv_file(tmp_path_str);
             let mut bds_file = BdsFile::new_write(tmp_path_str);
             bds_file.write_to_key_dynamic("given_key", "given_value");
         }

@@ -16,9 +16,7 @@ const VALUE_ENTRY_MAX_SIZE: usize = 999;
 pub struct MetaData {
     pub is_final: bool,
 }
-//TODO remove this, its just whil debugging
-static mut lookup_count: u64 = 0;
-static mut skip_count: u64 = 0;
+
 impl MetaData {
     pub fn new(bit_vec: BitVec) -> MetaData {
         MetaData {
@@ -99,27 +97,15 @@ impl BdsFile {
             let key_size = BdsFile::read_key_size(file_mut);
             let value_size = BdsFile::read_value_size(file_mut);
 
-            //TODO confirm this logic holds and doesn't break the program.
-            //TODO DIFFERENT: Look into whether this comparison is worth it or not.
+            //TODO: Look into whether this comparison is worth it or not.
             if key_size != key_to_find.len() as i64 {
                 BdsFile::seek_value(file_mut, value_size, 3+key_size);
-                //TODO remove this, its just whil debugging
-                unsafe {
-                    skip_count = skip_count + 1;
-                    info!("skip count: {}", skip_count);
-                }
 
                 continue;
             }
             let key_to_check = &BdsFile::read_key_string(file_mut, key_size);
 
             is_key_found = key_to_find == key_to_check;
-
-            //TODO remove this, its just whil debugging
-            unsafe {
-                lookup_count = lookup_count + 1;
-                info!("Lookup count: {}", lookup_count);
-            }
 
             debug!("Comparing {} == {}?: {}",
                    key_to_find,
@@ -340,12 +326,10 @@ impl BdsFile {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use super::super::super::*;
 
     //MetaData tests
     #[test]
     fn test_metadata_to_bit_vec() {
-        //setup_logging();
         let mut metadata = MetaData::new_final();
         assert_eq!(true, metadata.to_bit_vec().get(7).unwrap());
         metadata = MetaData::new_not_final();
@@ -362,7 +346,6 @@ pub mod tests {
     
     #[test]
     fn test_metadata_write_format() {
-        //setup_logging();
         let metadata = MetaData::new_final();
         let formatted_vec_slice = string_from_u8(1 as u8);
         assert_eq!(formatted_vec_slice, metadata.write_format());
@@ -385,10 +368,8 @@ pub mod tests {
         }
     }
     
-    //TODO this test needs to be cleaned up.
     #[test]
     fn test_new_write_dynamic_and_read() {
-        //setup_logging();
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);
         {

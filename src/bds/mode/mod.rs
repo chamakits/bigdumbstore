@@ -5,6 +5,7 @@ pub enum Mode {
     Write(Vec<String>, Option<String>),
     JunkWrite(Vec<String>),
     Server(Vec<String>),
+    Nothing,
     Invalid(Vec<String>),
 }
 
@@ -56,6 +57,9 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
             read_val.remove(0);
             read_val.remove(0);
             Mode::Server(read_val)
+        }
+        "0" => {
+            Mode::Nothing
         }
         x => {
             error!("Given argument is Invalid: {}", x);

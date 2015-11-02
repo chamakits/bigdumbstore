@@ -3,7 +3,6 @@ machine:
     - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh
     - chmod +x ./rustup.sh
     - ./rustup.sh --yes
-    # - sudo apt-get install libXxf86vm-dev libosmesa6-dev
   environment:
     RUST_LOG: bigdumbstore=debug
 
@@ -11,3 +10,8 @@ test:
   override:
     - cargo build --verbose -j 2
     - cargo test
+
+general:
+  artifacts:
+    - "target/kcov"
+    - "target/doc"

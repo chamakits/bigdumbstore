@@ -1,6 +1,6 @@
 dependencies:
-  post:
-    - curl -sf -L https://static.rust-lang.org/rustup.sh | sh /dev/stdin --channel=nightly --yes
+  pre:
+    - curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly
 test:
   override:
     - cargo test

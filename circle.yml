@@ -1,8 +1,13 @@
 machine:
-    pre:
-        - curl -sS https://static.rust-lang.org/rustup.sh | sudo sh /dev/stdin --channel=nightly --yes
+  pre:
+    - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh
+    - chmod +x ./rustup.sh
+    - ./rustup.sh --yes
+    - sudo apt-get install libXxf86vm-dev libosmesa6-dev
+  environment:
+    RUST_LOG: bigdumbstore=debug
 
 test:
-    override:
-        - cargo build -v
-        - cargo test -v
+  override:
+    - cargo build --verbose -j 2
+    - cargo test

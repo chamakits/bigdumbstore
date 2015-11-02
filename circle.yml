@@ -17,6 +17,7 @@ test:
     - cargo build --verbose -j 2
     - cargo test
     - kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/bigdumbstore-*
+    - cargo doc
 
 general:
   artifacts:

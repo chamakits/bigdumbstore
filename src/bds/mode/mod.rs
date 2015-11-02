@@ -67,3 +67,6 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
         }
     }
 }
+#[cfg(test)]
+mod tests {
+}

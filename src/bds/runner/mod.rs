@@ -151,3 +151,6 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
     let mut bds = file::BdsFile::new_write(&path_str);
     bds.write_to_key_from_stdin(key_to_write, stdin);
 }
+#[cfg(test)]
+mod tests {
+}

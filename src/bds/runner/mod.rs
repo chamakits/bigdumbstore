@@ -153,4 +153,32 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
 }
 #[cfg(test)]
 mod tests {
+    use tempdir::TempDir;
+    use super::super::tests::*;
+    use std::fs;
+
+    #[test]
+    fn test_create_file_if_not_exist() {
+        let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
+        let tmp_path_str = &temp_file_path_string(&tmp_dir);
+
+        {
+            let file_found = match fs::metadata(tmp_path_str){
+                Err(x) => Option::None,
+                Ok(x) => Option::Some(false),
+            };
+            assert_eq!(Option::None, file_found);
+        }
+
+        super::create_file_if_not_exist(tmp_path_str);
+
+        let attr = match fs::metadata(tmp_path_str){
+            Ok(curr) => curr,
+            Err(why) => panic!("Couln't check file:{}", why),
+        };
+        let file_exists = attr.is_file();
+
+        assert_eq!(true, file_exists);
+
+    }
 }

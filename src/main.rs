@@ -22,7 +22,9 @@ fn main() {
         Mode::Read(args, path) => runner::reading(args, path),
         Mode::Write(args, path) => runner::writing(args, path),
         Mode::JunkWrite(args) => runner::junk_writing(args),
-        Mode::Nothing => {},
+        Mode::Nothing => {
+            do_nothing()
+        },
         x => panic!("Parameter given is invalid. Args:{:?}", x),
     }
 }
@@ -33,7 +35,6 @@ fn do_nothing(){
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     #[test]
     fn test_do_nothing() {
         super::do_nothing();

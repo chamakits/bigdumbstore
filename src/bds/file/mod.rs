@@ -4,7 +4,6 @@ use std::error::Error;
 use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
-use std::io::Stdin;
 use bit_vec::BitVec;
 
 // TODO change everything in this file from i32 to i64
@@ -339,7 +338,7 @@ impl BdsFile {
 
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     //MetaData tests
@@ -372,14 +371,7 @@ mod tests {
 
     use tempdir::TempDir;
     use std::fs;
-
-    fn temp_file_path_string<'a>(tmp_dir: &'a TempDir) -> String {
-        tmp_dir.path()
-            .join("bds_kv_file")
-            .to_str()
-            .unwrap()
-            .to_string()
-    }
+    use super::super::tests::*;
 
     fn create_kv_file(tmp_path_str: &str) {
         match fs::File::create(tmp_path_str) {

@@ -1,6 +1,20 @@
 # bigdumbstore
 Reimplementation of the 'bigdumbstore' I began to do in C some time back, but with rust.
 
+## What is it
+It's a VERY dumb key value store. It given (from stdin) the value [value], and the key [key] it basically inserts at the end of the file:
+[value][key][size of value 0 padded up to 999][size of key 0 padded up to 999]
+
+Ex:
+
+```
+given [value] = value
+given [key] = key
+
+It writes at the end of the file:
+valuekey005003
+```
+
 ## Building
 
 ```

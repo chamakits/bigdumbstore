@@ -7,8 +7,7 @@ extern crate tempdir;
 use std::env;
 mod bds;
 
-use bds::mode;
-use bds::mode::Mode;
+use bds::runner::Mode;
 use bds::runner;
 
 fn main() {
@@ -16,7 +15,7 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
     debug!("Args: {:?}", args);
-    let run_mode = mode::determine_mode(args);
+    let run_mode = runner::determine_mode(args);
     debug!("Run mode is: {:?}", run_mode);
     match run_mode {
         Mode::Read(args, path) => runner::reading(args, path),

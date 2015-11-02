@@ -7,7 +7,77 @@ use std::env;
 use std::char;
 
 // TODO do this in a smart way
-const KV_FILE: &'static str = "/home/chamakits/.config-2/big-dumb-store/.v9_store";
+const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
+
+#[derive(Debug)]
+pub enum Mode {
+    // TODO maybe change to be a key only instead of the whole vector
+    Read(Vec<String>, Option<String>),
+    Write(Vec<String>, Option<String>),
+    JunkWrite(Vec<String>),
+    Server(Vec<String>),
+    Nothing,
+    Invalid(Vec<String>),
+}
+
+pub fn determine_mode(arguments: Vec<String>) -> Mode {
+    let arg = arguments.get(1).unwrap().split_at(1);
+    debug!("Arg split: {:?}", arg);
+    match arg.0 {
+        "g" => {
+            let mut read_val: Vec<String> = arguments.to_vec();
+            read_val.remove(0);
+            read_val.remove(0);
+            {
+                let _path_kv_file = arg.1.to_string();
+                let path_kv_file = if _path_kv_file.len() > 0 {
+                    Option::Some(_path_kv_file)
+                } else {
+                    Option::None
+                };
+
+                Mode::Read(read_val, path_kv_file)
+            }
+        }
+        "p" => {
+            let mut read_val: Vec<String> = arguments.to_vec();
+            read_val.remove(0);
+            read_val.remove(0);
+            // S
+            {
+                let _path_kv_file = arg.1.to_string();
+                let path_kv_file = if _path_kv_file.len() > 0 {
+                    Option::Some(_path_kv_file)
+                } else {
+                    Option::None
+                };
+
+                Mode::Write(read_val, path_kv_file)
+            }
+            // E
+        }
+        "j" => {
+            let mut read_val: Vec<String> = arguments.to_vec();
+            read_val.remove(0);
+            read_val.remove(0);
+
+            Mode::JunkWrite(read_val)
+        }
+        "s" => {
+            let mut read_val: Vec<String> = arguments.to_vec();
+            read_val.remove(0);
+            read_val.remove(0);
+            Mode::Server(read_val)
+        }
+        "0" => {
+            Mode::Nothing
+        }
+        x => {
+            error!("Given argument is Invalid: {}", x);
+            Mode::Invalid(arguments.to_vec())
+        }
+    }
+}
 
 fn create_file_if_not_exist(kv_file_path_str: &str) {
     let kv_file_path = Path::new(kv_file_path_str);
@@ -55,18 +125,7 @@ fn create_directories_if_needed(path: &Path) -> String {
     if path_str.len() == 0 {
         return path_str.to_string();
     }
-    //
-    // let resolve_path_for_home = match path_str.split_at(1) {
-    // ("~",x) => {
-    // debug!("Found home directory");
-    // env::home_dir().unwrap().join(Path::new(x))
-    // },
-    // _ => {
-    // debug!("Not a home directory specified");
-    // path.to_path_buf()
-    // }
-    // };
-    //
+
     let resolve_path_for_home = path_with_curly_to_abs(path_str);
     debug!("resolve_path_for_home: {:?}", resolve_path_for_home);
 

@@ -3,6 +3,11 @@ machine:
     - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh
     - chmod +x ./rustup.sh
     - ./rustup.sh --yes
+    - export PROH = `pwd`
+    - sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev
+    - wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
+    - tar xzf master.tar.gz && mkdir kcov-master/build && cd kcov-master/build && cmake .. && make
+    - sudo make install && cd ../..
   environment:
     RUST_LOG: bigdumbstore=debug
 
@@ -10,6 +15,7 @@ test:
   override:
     - cargo build --verbose -j 2
     - cargo test
+    - kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/bigdumbstore-*
 
 general:
   artifacts:

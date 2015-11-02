@@ -237,7 +237,7 @@ impl BdsFile {
         option_val
     }
 
-    pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut Stdin) {
+    pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut Read) {
         let mut string_in = &mut String::with_capacity(BUFF_SIZE);
         let _stdin_read_size = stdin.read_to_string(string_in);
         debug!("_stdin_read_size:{:?}, string_in.len:{}, BUFF_SIZE:{}",
@@ -392,7 +392,7 @@ mod tests {
     
     //TODO this test needs to be cleaned up.
     #[test]
-    fn test_new_write_and_read() {
+    fn test_new_write_dynamic_and_read() {
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);
         {

@@ -340,10 +340,12 @@ impl BdsFile {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use super::super::super::*;
 
     //MetaData tests
     #[test]
     fn test_metadata_to_bit_vec() {
+        //setup_logging();
         let mut metadata = MetaData::new_final();
         assert_eq!(true, metadata.to_bit_vec().get(7).unwrap());
         metadata = MetaData::new_not_final();
@@ -360,6 +362,7 @@ pub mod tests {
     
     #[test]
     fn test_metadata_write_format() {
+        //setup_logging();
         let metadata = MetaData::new_final();
         let formatted_vec_slice = string_from_u8(1 as u8);
         assert_eq!(formatted_vec_slice, metadata.write_format());
@@ -385,6 +388,7 @@ pub mod tests {
     //TODO this test needs to be cleaned up.
     #[test]
     fn test_new_write_dynamic_and_read() {
+        //setup_logging();
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);
         {

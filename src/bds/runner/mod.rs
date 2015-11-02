@@ -214,17 +214,19 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
 mod tests {
     use tempdir::TempDir;
     use super::super::tests::*;
+    use super::super::super::*;
     use std::fs;
 
     #[test]
     fn test_create_file_if_not_exist() {
+        //setup_logging();
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);
 
         {
             let file_found = match fs::metadata(tmp_path_str){
-                Err(x) => Option::None,
-                Ok(x) => Option::Some(false),
+                Err(_) => Option::None,
+                Ok(_) => Option::Some(false),
             };
             assert_eq!(Option::None, file_found);
         }

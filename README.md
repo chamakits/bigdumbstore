@@ -1,7 +1,7 @@
 # bigdumbstore
 Reimplementation of the 'bigdumbstore' I began to do in C some time back, but with rust.
 
-## Status [![Build Status](https://travis-ci.org/chamakits/bigdumbstore.svg?branch=master)](https://travis-ci.org/chamakits/bigdumbstore) [![Coverage Status](https://coveralls.io/repos/chamakits/bigdumbstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/chamakits/bigdumbstore?branch=master)
+## Status [![Build Status](https://travis-ci.org/chamakits/bigdumbstore.svg?branch=master)](https://travis-ci.org/chamakits/bigdumbstore) [![Coverage Status](https://coveralls.io/repos/chamakits/bigdumbstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/chamakits/bigdumbstore?branch=master) [![Circle CI](https://circleci.com/gh/chamakits/bigdumbstore.svg?style=svg)](https://circleci.com/gh/chamakits/bigdumbstore)
 
 ## What is it
 It's a VERY dumb key value store. It given (from stdin) the value [value], and the key [key] it basically inserts at the end of the file:

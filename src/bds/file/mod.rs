@@ -327,6 +327,11 @@ impl BdsFile {
 pub mod tests {
     use super::*;
 
+    #[test]
+    fn mock_forcing_functions_compiled() {
+        let _1 = super::BdsFile::write_to_key_from_stdin;
+    }
+    
     //MetaData tests
     #[test]
     fn test_metadata_to_bit_vec() {

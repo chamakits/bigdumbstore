@@ -217,6 +217,18 @@ mod tests {
     use std::fs;
 
     #[test]
+    fn mock_forcing_functions_compiled() {
+        let _1 = super::determine_mode;
+        //let _1 = vec![|x| {super::determine_mode(x);}, |x:Vec<String>| {super::junk_writing;}];
+        let _2 = super::junk_writing;
+        let _3 = super::reading;
+        let _4 = super::writing;
+        let _5 = super::path_with_curly_to_abs;
+        let _6 = super::create_directories_if_needed;
+        
+    }
+    
+    #[test]
     fn test_create_file_if_not_exist() {
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);

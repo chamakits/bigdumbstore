@@ -8,8 +8,8 @@ use std::char;
 
 // TODO do this in a smart way
 const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
-
 #[derive(Debug)]
+#[derive(PartialEq)]
 pub enum Mode {
     // TODO maybe change to be a key only instead of the whole vector
     Read(Vec<String>, Option<String>),
@@ -215,7 +215,7 @@ mod tests {
     use tempdir::TempDir;
     use super::super::tests::*;
     use std::fs;
-
+    
     #[test]
     fn mock_forcing_functions_compiled() {
         let _1 = super::determine_mode;
@@ -227,7 +227,44 @@ mod tests {
         let _6 = super::create_directories_if_needed;
         
     }
-    
+
+    #[test]
+    fn test_determine_mode() {
+        //reading
+        //S
+        super::super::super::setup_logging();
+        let args: Vec<String> = vec!["ignored", "g_kvf", "given-key"].iter()
+            .map(|x| x.to_string()).collect();
+        let mode = super::determine_mode(args.to_vec());
+        //let expected = super::Mode::Read(args, Option::Some("_kvf".to_string()));
+        let exp = super::Mode::Read(vec!["given-key".to_string()], Option::Some("_kvf".to_string()));
+        {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
+        assert_eq!(exp, mode);
+        //E
+
+        //writing
+        //S
+        super::super::super::setup_logging();
+        let args: Vec<String> = vec!["ignored", "p_kvf", "given-key"].iter()
+            .map(|x| x.to_string()).collect();
+        let mode = super::determine_mode(args.to_vec());
+        let exp = super::Mode::Write(vec!["given-key".to_string()], Option::Some("_kvf".to_string()));
+        {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
+        assert_eq!(exp, mode);
+        //E
+
+        //junk_mode
+        //S
+        super::super::super::setup_logging();
+        let args: Vec<String> = vec!["ignored", "j", "key"].iter()
+            .map(|x| x.to_string()).collect();
+        let mode = super::determine_mode(args.to_vec());
+        let exp = super::Mode::JunkWrite(vec!["key".to_string()]);
+        {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
+        assert_eq!(exp, mode);
+        //E
+    }
+
     #[test]
     fn test_create_file_if_not_exist() {
         let tmp_dir = TempDir::new("bds_kv_dir").unwrap();

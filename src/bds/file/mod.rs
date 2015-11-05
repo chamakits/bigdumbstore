@@ -391,4 +391,32 @@ pub mod tests {
         }
     }
 
+    use std::io::Cursor;
+    #[test]
+    fn test_write_to_key_from_stdin() {
+        super::super::super::setup_logging();
+        info!("START: test_write_to_key_from_stdin");
+        let _tmp_dir = TempDir::new("bds_kv_dir");
+        let tmp_dir = _tmp_dir.unwrap();
+        let tmp_path_str = &temp_file_path_string(&tmp_dir);
+        create_kv_file(tmp_path_str);
+        let mut bds_file = BdsFile::new_write(tmp_path_str);
+
+        let string_as_stdin = "Given String as if stdin".to_string();
+        let bytes = string_as_stdin.to_string().into_bytes();
+        let mut cursor = Cursor::new(bytes);
+
+        let given_key = "given-key";
+        bds_file.write_to_key_from_stdin(given_key, &mut cursor);
+
+        {
+            let mut bds_file = BdsFile::new_read(tmp_path_str);
+            let val_found = bds_file.find_value_by_key_from_beginning(given_key).unwrap();
+            assert_eq!(string_as_stdin, val_found);
+            //assert_eq!(Option::Some("given_value".to_string()), found_val);
+        }
+
+        info!("END: test_write_to_key_from_stdin");
+    }
+
 }

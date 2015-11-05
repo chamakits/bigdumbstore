@@ -250,6 +250,10 @@ mod tests {
         let file_exists = attr.is_file();
 
         assert_eq!(true, file_exists);
+    }
 
+    #[test]
+    fn test_reading() {
+        
     }
 }

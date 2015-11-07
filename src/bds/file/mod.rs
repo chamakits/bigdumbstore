@@ -330,7 +330,7 @@ pub mod tests {
     #[test]
     fn mock_forcing_functions_compiled() {
         #![allow(path_statements)]
-        super::BdsFile::write_to_key_from_stdin;
+        let _1 = super::BdsFile::write_to_key_from_stdin;
     }
     
     //MetaData tests

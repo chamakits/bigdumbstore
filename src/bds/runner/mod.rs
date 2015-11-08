@@ -219,12 +219,10 @@ mod tests {
     macro_rules! do_nothing {
         ( $( $x:expr ),* ) => {
             {
-                let mut temp_vec: Vec<Box<Fn()>> = Vec::new();
                 $(
-                    let curr = $x;
-                    temp_vec.push(Box::new(|| {$x;}));
+                    let _curr = $x;
                     )*
-                    temp_vec
+
             }
         };
     }
@@ -232,19 +230,14 @@ mod tests {
     #[test]
     fn mock_forcing_functions_compiled() {
         #![allow(path_statements)]
-        #![allow(unused_variables)]
-//        let _1 = super::determine_mode;
-//        let _2 = super::junk_writing;
-//        let _3 = super::reading;
-//        let _4 = super::writing;
-//        let _5 = super::path_with_curly_to_abs;
-//        let _6 = super::create_directories_if_needed;
         
-        let _fn1 = Box::new(|| {super::determine_mode;});
-        let _fn2 = Box::new(|| {super::junk_writing;});
-
-        let _fns: Vec<Box<Fn()>> = vec![_fn1, _fn2];
-        let _fns2 = do_nothing![super::reading, super::writing, super::path_with_curly_to_abs, super::create_directories_if_needed];
+        let _fns2 = do_nothing![
+            super::determine_mode, 
+            super::junk_writing, 
+            super::reading, 
+            super::writing, 
+            super::path_with_curly_to_abs, 
+            super::create_directories_if_needed];
     }
 
     #[test]

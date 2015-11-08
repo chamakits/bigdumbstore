@@ -229,9 +229,7 @@ mod tests {
 
     #[test]
     fn mock_forcing_functions_compiled() {
-        #![allow(path_statements)]
-        
-        let _fns2 = do_nothing![
+        do_nothing![
             super::determine_mode, 
             super::junk_writing, 
             super::reading, 

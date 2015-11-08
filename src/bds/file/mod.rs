@@ -392,6 +392,30 @@ pub mod tests {
         }
     }
 
+    #[test]
+    fn test_new_write_dynamic_and_read_non_first() {
+        let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
+        let tmp_path_str = &temp_file_path_string(&tmp_dir);
+        {
+            create_kv_file(tmp_path_str);
+            let mut bds_file = BdsFile::new_write(tmp_path_str);
+            bds_file.write_to_key_dynamic("given_key", "given_value");
+        }
+
+        {
+            create_kv_file(tmp_path_str);
+            let mut bds_file = BdsFile::new_write(tmp_path_str);
+            bds_file.write_to_key_dynamic("given_key_again", "something else provided");
+        }
+
+        {
+            let mut bds_file = BdsFile::new_read(tmp_path_str);
+            let found_val = bds_file.find_value_by_key_from_beginning("given_key");
+            println!("Found val:{:?}", found_val);
+            assert_eq!(Option::Some("given_value".to_string()), found_val);
+        }
+    }
+
     use std::io::Cursor;
     #[test]
     fn test_write_to_key_from_stdin() {

@@ -221,6 +221,7 @@ mod tests {
             {
                 let mut temp_vec: Vec<Box<Fn()>> = Vec::new();
                 $(
+                    let curr = $x;
                     temp_vec.push(Box::new(|| {$x;}));
                     )*
                     temp_vec
@@ -231,6 +232,7 @@ mod tests {
     #[test]
     fn mock_forcing_functions_compiled() {
         #![allow(path_statements)]
+        #![allow(unused_variables)]
 //        let _1 = super::determine_mode;
 //        let _2 = super::junk_writing;
 //        let _3 = super::reading;

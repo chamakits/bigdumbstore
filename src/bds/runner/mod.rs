@@ -137,7 +137,7 @@ fn create_directories_if_needed(path: &Path) -> String {
     return resolve_path_for_home.to_str().unwrap().to_string();
 }
 
-pub fn reading(read_args: Vec<String>, path: Option<String>) {
+pub fn reading(read_args: Vec<String>, path: Option<String>) -> Option<String> {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
@@ -156,9 +156,8 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) {
     let mut bds = file::BdsFile::new_read(&path_str);
 
     let value_found = bds.find_value_by_key_from_beginning(key_to_find);
-    if value_found.is_some() {
-        println!("{}", value_found.unwrap());
-    }
+
+    value_found
 }
 
 const DEFAULT_KEY: &'static str = "default";
@@ -301,8 +300,38 @@ mod tests {
         assert_eq!(true, file_exists);
     }
 
+    use std::io::Cursor;
     #[test]
-    fn test_reading() {
-        //let 
+    fn test_writing_and_reading() {
+
+        //Getting value to read
+        let write_str = "This is what I'm writing";
+        let bytes = write_str.to_string().into_bytes();
+        let mut cursor_to_read = Cursor::new(bytes);
+
+        //Key
+        let key = vec!["key_given".to_string()];
+
+        //Path
+        let _tmp_dir = TempDir::new("bds_kv_dir");
+        let tmp_dir = _tmp_dir.unwrap();
+        let tmp_path_str = temp_file_path_string(&tmp_dir);
+
+
+        super::writing(
+            key.to_vec(), 
+            Option::Some(tmp_path_str.to_string()), 
+            &mut cursor_to_read);
+        
+        let other_key = vec!["other_key_given".to_string()];
+        super::writing(
+            other_key.to_vec(), 
+            Option::Some(tmp_path_str.to_string()), 
+            &mut cursor_to_read);
+
+        let val_read = super::reading(
+            key.to_vec(), 
+            Option::Some(tmp_path_str.to_string()));
+        assert_eq!(write_str.to_string(), val_read.unwrap());
     }
 }

@@ -18,7 +18,12 @@ fn main() {
     let run_mode = runner::determine_mode(args);
     debug!("Run mode is: {:?}", run_mode);
     match run_mode {
-        Mode::Read(args, path) => runner::reading(args, path),
+        Mode::Read(args, path) => {
+            let value_found = runner::reading(args, path);
+            if value_found.is_some() {
+                println!("{}", value_found.unwrap());
+            }
+        },
         Mode::Write(args, path) => {
             let stdin = &mut io::stdin();
             runner::writing(args, path, stdin)

@@ -161,8 +161,14 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) -> Option<String> {
 }
 
 const DEFAULT_KEY: &'static str = "default";
-pub fn junk_writing(write_args: Vec<String>) {
-    let path = "JunkKVFile";
+const DEFAULT_PATH: &'static str = "JunkKVFile";
+pub fn junk_writing(write_args: Vec<String>, given_path: Option<String>) {
+
+    let _path = match given_path {
+        Some(x) => x,
+        None => DEFAULT_PATH.to_string()
+    };
+    let path = &_path;
     create_file_if_not_exist(path);
     let root_key = match write_args.get(0) {
         Some(key) => format!("{}",key),
@@ -333,5 +339,26 @@ mod tests {
             key.to_vec(), 
             Option::Some(tmp_path_str.to_string()));
         assert_eq!(write_str.to_string(), val_read.unwrap());
+    }
+
+    #[test]
+    fn test_junk_writing() {
+        //Path
+        let _tmp_dir = TempDir::new("bds_kv_dir");
+        let tmp_dir = _tmp_dir.unwrap();
+        let tmp_path_str = temp_file_path_string(&tmp_dir);
+
+        //Key
+        //let _key = "default".to_string();
+        let _key = "my_key".to_string();
+        let key = vec![_key.to_string()];
+        super::junk_writing(key, Option::Some(tmp_path_str.to_string()));
+        
+        let key = format!("{}_key_{}_{}", _key.to_string(), 25, 25);
+        let key = vec![key];
+        let val_read = super::reading(
+            key.to_vec(), 
+            Option::Some(tmp_path_str.to_string()));
+        info!("Found when writing junk: {:?}", val_read);
     }
 }

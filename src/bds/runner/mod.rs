@@ -186,7 +186,7 @@ pub fn junk_writing(write_args: Vec<String>, given_path: Option<String>) {
         for j in 0..inner {
             to_write = format!("Smaller!_BEFORE_{}{}_AFTER", char::from_u32(i+a).unwrap(), char::from_u32(j+a).unwrap());
             bigger_str = bigger_str + &to_write;
-            let key = format!("{}_key_{}_{}", root_key, inner, outer);
+            let key = format!("{}_key_{}_{}", root_key, j, i);
             bds.write_to_key_dynamic(&key, &to_write);
             let bigger_again = "Bigger!".to_string() + &bigger_str;
             bds.write_to_key_dynamic(&key, &bigger_again);
@@ -354,7 +354,7 @@ mod tests {
         let key = vec![_key.to_string()];
         super::junk_writing(key, Option::Some(tmp_path_str.to_string()));
         
-        let key = format!("{}_key_{}_{}", _key.to_string(), 25, 25);
+        let key = format!("{}_key_{}_{}", _key.to_string(), 0, 0);
         let key = vec![key];
         let val_read = super::reading(
             key.to_vec(), 

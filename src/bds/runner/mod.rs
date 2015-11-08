@@ -20,14 +20,18 @@ pub enum Mode {
     Invalid(Vec<String>),
 }
 
+fn cleanup_arguments(arguments: &mut Vec<String>) {
+    arguments.remove(0);
+    arguments.remove(0);
+}
+
 pub fn determine_mode(arguments: Vec<String>) -> Mode {
     let arg = arguments.get(1).unwrap().split_at(1);
     debug!("Arg split: {:?}", arg);
     match arg.0 {
         "g" => {
             let mut read_val: Vec<String> = arguments.to_vec();
-            read_val.remove(0);
-            read_val.remove(0);
+            cleanup_arguments(&mut read_val);
             {
                 let _path_kv_file = arg.1.to_string();
                 let path_kv_file = if _path_kv_file.len() > 0 {
@@ -35,15 +39,13 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
                 } else {
                     Option::None
                 };
-
                 Mode::Read(read_val, path_kv_file)
             }
         }
+
         "p" => {
             let mut read_val: Vec<String> = arguments.to_vec();
-            read_val.remove(0);
-            read_val.remove(0);
-            // S
+            cleanup_arguments(&mut read_val);
             {
                 let _path_kv_file = arg.1.to_string();
                 let path_kv_file = if _path_kv_file.len() > 0 {
@@ -51,27 +53,26 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
                 } else {
                     Option::None
                 };
-
                 Mode::Write(read_val, path_kv_file)
             }
-            // E
         }
+
         "j" => {
             let mut read_val: Vec<String> = arguments.to_vec();
-            read_val.remove(0);
-            read_val.remove(0);
-
+            cleanup_arguments(&mut read_val);
             Mode::JunkWrite(read_val)
         }
+
         "s" => {
             let mut read_val: Vec<String> = arguments.to_vec();
-            read_val.remove(0);
-            read_val.remove(0);
+            cleanup_arguments(&mut read_val);
             Mode::Server(read_val)
         }
+
         "0" => {
             Mode::Nothing
         }
+
         x => {
             error!("Given argument is Invalid: {}", x);
             Mode::Invalid(arguments.to_vec())

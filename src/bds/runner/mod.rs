@@ -216,7 +216,8 @@ mod tests {
     use super::super::tests::*;
     use std::fs;
     
-    macro_rules! do_nothing {
+    #[macro_export]
+    macro_rules! assign_do_nothing {
         ( $( $x:expr ),* ) => {
             {
                 $(
@@ -229,7 +230,7 @@ mod tests {
 
     #[test]
     fn mock_forcing_functions_compiled() {
-        do_nothing![
+        assign_do_nothing![
             super::determine_mode, 
             super::junk_writing, 
             super::reading, 

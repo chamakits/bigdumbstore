@@ -403,7 +403,6 @@ pub mod tests {
         }
 
         {
-            create_kv_file(tmp_path_str);
             let mut bds_file = BdsFile::new_write(tmp_path_str);
             bds_file.write_to_key_dynamic("given_key_again", "something else provided");
         }

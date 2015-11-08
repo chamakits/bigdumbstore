@@ -162,7 +162,11 @@ pub fn reading(read_args: Vec<String>, path: Option<String>) -> Option<String> {
 
 const DEFAULT_KEY: &'static str = "default";
 const DEFAULT_PATH: &'static str = "JunkKVFile";
-pub fn junk_writing(write_args: Vec<String>, given_path: Option<String>) {
+pub fn junk_writing(
+    write_args: Vec<String>, 
+    given_path: Option<String>, 
+    repeat_outer: u32, 
+    repeat_inner: u32) {
 
     let _path = match given_path {
         Some(x) => x,
@@ -180,8 +184,8 @@ pub fn junk_writing(write_args: Vec<String>, given_path: Option<String>) {
     let mut to_write:String;
     
     let a = 'a' as u32;
-    let outer = 25;
-    let inner = 25;
+    let outer = repeat_outer;
+    let inner = repeat_inner;
     for i in 0..outer {
         for j in 0..inner {
             to_write = format!("Smaller!_BEFORE_{}{}_AFTER", char::from_u32(i+a).unwrap(), char::from_u32(j+a).unwrap());
@@ -352,7 +356,7 @@ mod tests {
         //let _key = "default".to_string();
         let _key = "my_key".to_string();
         let key = vec![_key.to_string()];
-        super::junk_writing(key, Option::Some(tmp_path_str.to_string()));
+        super::junk_writing(key, Option::Some(tmp_path_str.to_string()), 3, 3);
         
         let key = format!("{}_key_{}_{}", _key.to_string(), 0, 0);
         let key = vec![key];

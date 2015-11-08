@@ -5,6 +5,7 @@ extern crate bit_vec;
 extern crate tempdir;
 
 use std::env;
+use std::io;
 mod bds;
 
 use bds::runner::Mode;
@@ -18,7 +19,10 @@ fn main() {
     debug!("Run mode is: {:?}", run_mode);
     match run_mode {
         Mode::Read(args, path) => runner::reading(args, path),
-        Mode::Write(args, path) => runner::writing(args, path),
+        Mode::Write(args, path) => {
+            let stdin = &mut io::stdin();
+            runner::writing(args, path, stdin)
+        },
         Mode::JunkWrite(args) => runner::junk_writing(args),
         Mode::Nothing => {
             do_nothing()

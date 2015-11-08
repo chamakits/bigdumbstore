@@ -1,10 +1,10 @@
 use super::file;
-use std::io;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::env;
 use std::char;
+use std::io::prelude::*;
 
 // TODO do this in a smart way
 const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
@@ -190,7 +190,7 @@ pub fn junk_writing(write_args: Vec<String>) {
     
 }
 
-pub fn writing(write_args: Vec<String>, path: Option<String>) {
+pub fn writing(write_args: Vec<String>, path: Option<String>, read_from: &mut Read) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
@@ -205,10 +205,11 @@ pub fn writing(write_args: Vec<String>, path: Option<String>) {
 
     create_file_if_not_exist(&path_str);
     let key_to_write = write_args.get(0).unwrap();
-    let mut stdin = &mut io::stdin();
+    //let mut stdin = &mut io::stdin();
 
     let mut bds = file::BdsFile::new_write(&path_str);
-    bds.write_to_key_from_stdin(key_to_write, stdin);
+    //bds.write_to_key_from_stdin(key_to_write, stdin);
+    bds.write_to_key_from_stdin(key_to_write, read_from);
 }
 #[cfg(test)]
 mod tests {
@@ -302,6 +303,6 @@ mod tests {
 
     #[test]
     fn test_reading() {
-        
+        //let 
     }
 }

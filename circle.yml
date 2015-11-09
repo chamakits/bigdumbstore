@@ -1,6 +1,6 @@
 machine:
   pre: 
-    - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh
+    - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh --channel=nightly
     - chmod +x ./rustup.sh
     - ./rustup.sh --yes
     - sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev 

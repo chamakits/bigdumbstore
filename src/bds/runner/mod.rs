@@ -286,11 +286,11 @@ mod tests {
         assert_eq!(exp, mode);
         //E
     }
-
+    use std::path::Path;
     #[test]
     fn test_create_file_if_not_exist() {
-        let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
-        let tmp_path_str = &temp_file_path_string(&tmp_dir);
+        let tmp_dir = TempDir::new("bds_kv_dir");
+        let tmp_path_str = &temp_file_path_string(&tmp_dir.unwrap());
 
         {
             let file_found = match fs::metadata(tmp_path_str){
@@ -309,6 +309,10 @@ mod tests {
         let file_exists = attr.is_file();
 
         assert_eq!(true, file_exists);
+
+        fs::remove_file(Path::new(tmp_path_str)).unwrap();
+        fs::remove_dir(Path::new(tmp_path_str).parent().unwrap()).unwrap();
+
     }
 
     use std::io::Cursor;

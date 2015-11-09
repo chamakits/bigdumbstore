@@ -14,7 +14,7 @@ machine:
 
 test:
   override:
-    - cargo build || :
+    - cargo build || echo "force success"
     - cd .. && ./rustup.sh --channel=nightly --yes
     - cargo build --verbose -j 2
     - cargo test

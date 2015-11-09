@@ -15,6 +15,8 @@ machine:
 
 test:
   override:
+    - cargo build
+    - cd .. && ./rustup.sh --channel=nightly --yes
     - cargo build --verbose -j 2
     - cargo test
     - kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/bigdumbstore-*

@@ -290,6 +290,9 @@ mod tests {
     #[test]
     fn test_create_file_if_not_exist() {
         let tmp_dir = TempDir::new("bds_kv_dir");
+        //This will have the TempDir auto clear itself right then and there, 
+        //so that I can actually creat the file and directory later on
+        //with the function to test
         let tmp_path_str = &temp_file_path_string(&tmp_dir.unwrap());
 
         {

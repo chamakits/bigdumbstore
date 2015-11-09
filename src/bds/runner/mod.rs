@@ -189,7 +189,10 @@ pub fn junk_writing(
     let inner = repeat_inner;
     for i in 0..outer {
         for j in 0..inner {
-            to_write = format!("Smaller!_BEFORE_{}{}_AFTER", char::from_u32(i+a).unwrap(), char::from_u32(j+a).unwrap());
+            to_write = format!(
+                "Smaller!_BEFORE_{}{}_AFTER",
+                char::from_u32((i+a) % 40).unwrap(),
+                char::from_u32((j+a) % 40).unwrap());
             bigger_str = bigger_str + &to_write;
             let key = format!("{}_key_{}_{}", root_key, j, i);
             bds.write_to_key_dynamic(&key, &to_write);
@@ -354,12 +357,16 @@ mod tests {
 
     use test::Bencher;
     #[bench]
-    fn test_writing_and_reading_multiple_times(b: &mut Bencher) {
+    fn test_writing_and_reading_bench(b: &mut Bencher) {
         b.iter( || test_writing_and_reading());
     }
 
     #[test]
     fn test_junk_writing() {
+        test_junk_writing_parameterized(3,3);
+    }
+
+    fn test_junk_writing_parameterized(repeat_outer: u32, repeat_inner: u32) {
         //Path
         let _tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&_tmp_dir);
@@ -368,7 +375,7 @@ mod tests {
         //let _key = "default".to_string();
         let _key = "my_key".to_string();
         let key = vec![_key.to_string()];
-        super::junk_writing(key, Option::Some(tmp_path_str.to_string()), 3, 3);
+        super::junk_writing(key, Option::Some(tmp_path_str.to_string()), repeat_outer, repeat_inner);
         
         let key = format!("{}_key_{}_{}", _key.to_string(), 0, 0);
         let key = vec![key];
@@ -376,5 +383,11 @@ mod tests {
             key.to_vec(), 
             Option::Some(tmp_path_str.to_string()));
         info!("Found when writing junk: {:?}", val_read);
+    }
+
+    #[bench]
+    fn test_junk_writing_bench(b: &mut Bencher) {
+        //b.iter( || test_junk_writing_parameterized(25,25));
+        b.iter( || test_junk_writing_parameterized(40,40));
     }
 }

@@ -31,7 +31,7 @@ fn main() {
             let stdin = &mut io::stdin();
             runner::writing(args, path, stdin)
         },
-        Mode::JunkWrite(args) => runner::junk_writing(args, Option::None, 25, 25),
+        Mode::JunkWrite(args) => runner::junk_writing(args, Option::None, 40, 40),
         Mode::Nothing => {
             do_nothing()
         },

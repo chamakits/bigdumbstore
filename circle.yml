@@ -1,8 +1,8 @@
 machine:
   pre: 
     - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh 
-    - chmod +x ./rustup.sh --channel=nightly
-    - ./rustup.sh --yes
+    - chmod +x ./rustup.sh
+    - ./rustup.sh --yes --channel=nightly
     - sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev 
     - wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz 
     - tar xzf master.tar.gz 

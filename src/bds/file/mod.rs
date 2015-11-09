@@ -441,13 +441,11 @@ pub mod tests {
         super::super::super::setup_logging();
         info!("START: test_write_to_key_from_stdin");
 
-        //S
-        let _tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_dir = _tmp_dir.unwrap();
+        let tmp_dir = TempDir::new("bds_kv_dir").unwrap();
         let tmp_path_str = &temp_file_path_string(&tmp_dir);
-        //E
 
         create_kv_file(tmp_path_str);
+
         let mut bds_file = BdsFile::new_write(tmp_path_str);
 
         let string_as_stdin = "Given String as if stdin".to_string();

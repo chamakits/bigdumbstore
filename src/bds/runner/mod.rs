@@ -325,8 +325,7 @@ mod tests {
 
         //Path
         let _tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_dir = _tmp_dir.unwrap();
-        let tmp_path_str = temp_file_path_string(&tmp_dir);
+        let tmp_path_str = temp_file_path_string(&_tmp_dir.unwrap());
 
 
         super::writing(
@@ -350,8 +349,7 @@ mod tests {
     fn test_junk_writing() {
         //Path
         let _tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_dir = _tmp_dir.unwrap();
-        let tmp_path_str = temp_file_path_string(&tmp_dir);
+        let tmp_path_str = temp_file_path_string(&_tmp_dir.unwrap());
 
         //Key
         //let _key = "default".to_string();

@@ -388,6 +388,6 @@ mod tests {
     #[bench]
     fn test_junk_writing_bench(b: &mut Bencher) {
         //b.iter( || test_junk_writing_parameterized(25,25));
-        b.iter( || test_junk_writing_parameterized(40,40));
+        b.iter( || test_junk_writing_parameterized(10,10));
     }
 }

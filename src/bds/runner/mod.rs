@@ -324,8 +324,8 @@ mod tests {
         let key = vec!["key_given".to_string()];
 
         //Path
-        let _tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_path_str = temp_file_path_string(&_tmp_dir.unwrap());
+        let _tmp_dir = TempDir::new("bds_kv_dir").unwrap();
+        let tmp_path_str = &temp_file_path_string(&_tmp_dir);
 
 
         super::writing(
@@ -345,11 +345,17 @@ mod tests {
         assert_eq!(write_str.to_string(), val_read.unwrap());
     }
 
+    use test::Bencher;
+    #[bench]
+    fn test_writing_and_reading_multiple_times(b: &mut Bencher) {
+        b.iter( || test_writing_and_reading());
+    }
+
     #[test]
     fn test_junk_writing() {
         //Path
-        let _tmp_dir = TempDir::new("bds_kv_dir");
-        let tmp_path_str = temp_file_path_string(&_tmp_dir.unwrap());
+        let _tmp_dir = TempDir::new("bds_kv_dir").unwrap();
+        let tmp_path_str = &temp_file_path_string(&_tmp_dir);
 
         //Key
         //let _key = "default".to_string();

@@ -1,8 +1,11 @@
+#![feature(test)]
+
 #[macro_use]
 extern crate log;
 extern crate env_logger;
 extern crate bit_vec;
 extern crate tempdir;
+extern crate test;
 
 use std::env;
 use std::io;

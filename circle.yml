@@ -1,7 +1,7 @@
 machine:
   pre: 
-    - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh --channel=nightly
-    - chmod +x ./rustup.sh
+    - curl -sS https://static.rust-lang.org/rustup.sh > rustup.sh 
+    - chmod +x ./rustup.sh --channel=nightly
     - ./rustup.sh --yes
     - sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev 
     - wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz 
@@ -18,6 +18,7 @@ test:
     - cargo test
     - kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/bigdumbstore-*
     - cargo doc
+    - cargo bench
 
 general:
   artifacts:

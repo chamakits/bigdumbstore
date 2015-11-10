@@ -18,7 +18,7 @@ fn main() {
     setup_logging();
     let args: Vec<String> = env::args().collect();
     debug!("Args: {:?}", args);
-    let run_mode = runner::determine_mode(args);
+    let run_mode = runner::determine_mode(&args);
     debug!("Run mode is: {:?}", run_mode);
     match run_mode {
         Mode::Read(args, path) => {

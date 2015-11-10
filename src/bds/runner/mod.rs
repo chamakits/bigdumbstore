@@ -10,10 +10,10 @@ use std::io::prelude::*;
 const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
 #[derive(Debug)]
 #[derive(PartialEq)]
-pub enum Mode {
+pub enum Mode <'a> {
     // TODO maybe change to be a key only instead of the whole vector
-    Read(Vec<String>, Option<String>),
-    Write(Vec<String>, Option<String>),
+    Read(Vec<String>, Option<&'a str>),
+    Write(Vec<String>, Option<&'a str>),
     JunkWrite(Vec<String>),
     Server(Vec<String>),
     Nothing,
@@ -25,7 +25,7 @@ fn cleanup_arguments(arguments: &mut Vec<String>) {
     arguments.remove(0);
 }
 
-pub fn determine_mode(arguments: Vec<String>) -> Mode {
+pub fn determine_mode<'a>(arguments: &'a Vec<String>) -> Mode<'a> {
     let arg = arguments.get(1).unwrap().split_at(1);
     debug!("Arg split: {:?}", arg);
     match arg.0 {
@@ -33,7 +33,7 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
             let mut read_val: Vec<String> = arguments.to_vec();
             cleanup_arguments(&mut read_val);
             {
-                let _path_kv_file = arg.1.to_string();
+                let _path_kv_file = arg.1;
                 let path_kv_file = if _path_kv_file.len() > 0 {
                     Option::Some(_path_kv_file)
                 } else {
@@ -47,7 +47,7 @@ pub fn determine_mode(arguments: Vec<String>) -> Mode {
             let mut read_val: Vec<String> = arguments.to_vec();
             cleanup_arguments(&mut read_val);
             {
-                let _path_kv_file = arg.1.to_string();
+                let _path_kv_file = arg.1;
                 let path_kv_file = if _path_kv_file.len() > 0 {
                     Option::Some(_path_kv_file)
                 } else {
@@ -138,7 +138,7 @@ fn create_directories_if_needed(path: &Path) -> String {
     return resolve_path_for_home.to_str().unwrap().to_string();
 }
 
-pub fn reading(read_args: Vec<String>, path: Option<String>) -> Option<String> {
+pub fn reading<'a>(read_args: Vec<String>, path: Option<&'a str>) -> Option<String> {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
@@ -203,7 +203,7 @@ pub fn junk_writing(
     
 }
 
-pub fn writing(write_args: Vec<String>, path: Option<String>, read_from: &mut Read) {
+pub fn writing<'a>(write_args: Vec<String>, path: Option<&'a str>, read_from: &mut Read) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
@@ -218,10 +218,9 @@ pub fn writing(write_args: Vec<String>, path: Option<String>, read_from: &mut Re
 
     create_file_if_not_exist(&path_str);
     let key_to_write = write_args.get(0).unwrap();
-    //let mut stdin = &mut io::stdin();
+
 
     let mut bds = file::BdsFile::new_write(&path_str);
-    //bds.write_to_key_from_stdin(key_to_write, stdin);
     bds.write_to_key_from_stdin(key_to_write, read_from);
 }
 #[cfg(test)]
@@ -260,9 +259,8 @@ mod tests {
         super::super::super::setup_logging();
         let args: Vec<String> = vec!["ignored", "g_kvf", "given-key"].iter()
             .map(|x| x.to_string()).collect();
-        let mode = super::determine_mode(args.to_vec());
-        //let expected = super::Mode::Read(args, Option::Some("_kvf".to_string()));
-        let exp = super::Mode::Read(vec!["given-key".to_string()], Option::Some("_kvf".to_string()));
+        let mode = super::determine_mode(&args);
+        let exp = super::Mode::Read(vec!["given-key".to_string()], Option::Some("_kvf"));
         {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
         assert_eq!(exp, mode);
         //E
@@ -272,8 +270,8 @@ mod tests {
         super::super::super::setup_logging();
         let args: Vec<String> = vec!["ignored", "p_kvf", "given-key"].iter()
             .map(|x| x.to_string()).collect();
-        let mode = super::determine_mode(args.to_vec());
-        let exp = super::Mode::Write(vec!["given-key".to_string()], Option::Some("_kvf".to_string()));
+        let mode = super::determine_mode(&args);
+        let exp = super::Mode::Write(vec!["given-key".to_string()], Option::Some("_kvf"));
         {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
         assert_eq!(exp, mode);
         //E
@@ -283,7 +281,7 @@ mod tests {
         super::super::super::setup_logging();
         let args: Vec<String> = vec!["ignored", "j", "key"].iter()
             .map(|x| x.to_string()).collect();
-        let mode = super::determine_mode(args.to_vec());
+        let mode = super::determine_mode(&args);
         let exp = super::Mode::JunkWrite(vec!["key".to_string()]);
         {info!("expected: '{:?}', mode: '{:?}'", exp, mode);}
         assert_eq!(exp, mode);
@@ -340,18 +338,18 @@ mod tests {
 
         super::writing(
             key.to_vec(), 
-            Option::Some(tmp_path_str.to_string()), 
+            Option::Some(tmp_path_str), 
             &mut cursor_to_read);
         
         let other_key = vec!["other_key_given".to_string()];
         super::writing(
             other_key.to_vec(), 
-            Option::Some(tmp_path_str.to_string()), 
+            Option::Some(tmp_path_str), 
             &mut cursor_to_read);
 
         let val_read = super::reading(
             key.to_vec(), 
-            Option::Some(tmp_path_str.to_string()));
+            Option::Some(tmp_path_str));
         assert_eq!(write_str.to_string(), val_read.unwrap());
     }
 
@@ -359,8 +357,15 @@ mod tests {
     use test::Bencher;
     #[bench]
     fn test_writing_and_reading_bench(b: &mut Bencher) {
+        for (key, value) in env::vars() {
+            debug!("Pre={}: {}", key, value);
+        }
+
         env::set_var("RUST_LOG", "bigdumbstore=info");
         b.iter( || test_writing_and_reading());
+        for (key, value) in env::vars() {
+            debug!("Post={}: {}", key, value);
+        }
     }
 
     #[test]
@@ -374,7 +379,6 @@ mod tests {
         let tmp_path_str = &temp_file_path_string(&_tmp_dir);
 
         //Key
-        //let _key = "default".to_string();
         let _key = "my_key".to_string();
         let key = vec![_key.to_string()];
         super::junk_writing(key, Option::Some(tmp_path_str.to_string()), repeat_outer, repeat_inner);
@@ -383,13 +387,20 @@ mod tests {
         let key = vec![key];
         let val_read = super::reading(
             key.to_vec(), 
-            Option::Some(tmp_path_str.to_string()));
+            Option::Some(tmp_path_str));
         info!("Found when writing junk: {:?}", val_read);
     }
 
     #[bench]
     fn test_junk_writing_bench(b: &mut Bencher) {
+        for (key, value) in env::vars() {
+            debug!("Pre={}: {}", key, value);
+        }
+
         env::set_var("RUST_LOG", "bigdumbstore=info");
         b.iter( || test_junk_writing_parameterized(10,10));
+        for (key, value) in env::vars() {
+            debug!("Post={}: {}", key, value);
+        }
     }
 }

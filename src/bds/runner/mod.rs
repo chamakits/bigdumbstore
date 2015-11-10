@@ -358,6 +358,7 @@ mod tests {
     use test::Bencher;
     #[bench]
     fn test_writing_and_reading_bench(b: &mut Bencher) {
+        env::set_var("RUST_LOG", "bigdumbstore=info");
         b.iter( || test_writing_and_reading());
     }
 
@@ -387,7 +388,7 @@ mod tests {
 
     #[bench]
     fn test_junk_writing_bench(b: &mut Bencher) {
-        //b.iter( || test_junk_writing_parameterized(25,25));
+        env::set_var("RUST_LOG", "bigdumbstore=info");
         b.iter( || test_junk_writing_parameterized(10,10));
     }
 }

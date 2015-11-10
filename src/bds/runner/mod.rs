@@ -355,6 +355,7 @@ mod tests {
         assert_eq!(write_str.to_string(), val_read.unwrap());
     }
 
+    use std::env;
     use test::Bencher;
     #[bench]
     fn test_writing_and_reading_bench(b: &mut Bencher) {

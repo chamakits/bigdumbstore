@@ -14,7 +14,7 @@ install:
   - cmd: 7z e sqlite-dll-win64-x64-3100200.zip -y > nul
   - SET SQLITE3_LIB_DIR=%APPVEYOR_BUILD_FOLDER%
 
-build: true
+build: false
 
 test_script:
   - cargo test --verbose

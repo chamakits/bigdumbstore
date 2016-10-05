@@ -15,8 +15,8 @@ install:
 build: false
 
 test_script:
-  - cargo test --lib --verbose
-  - cargo test --lib --features "backup blob chrono functions load_extension serde_json trace"
+  - cargo test --verbose
+  - cargo test --features "backup blob chrono functions load_extension serde_json trace"
 
 cache:
 - C:\Users\appveyor\.cargo

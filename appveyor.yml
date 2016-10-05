@@ -1,4 +1,6 @@
 environment:
+  global:
+    PROJECT_NAME: bigdumbstore
   matrix:
   - TARGET: x86_64-pc-windows-msvc
   - TARGET: i686-pc-windows-msvc

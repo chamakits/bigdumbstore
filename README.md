@@ -35,3 +35,10 @@ echo "this is a value" | ./target/release/bigdumbstore p a-key
 ./target/release/bigdumbstore g a-key
 > this is a value
 ```
+
+
+# Useful links:
+
+## Helping to get this working on appveyor
+- https://github.com/japaric/rust-everywhere/blob/master/appveyor.yml
+- https://github.com/jgallagher/rusqlite/blob/master/appveyor.yml

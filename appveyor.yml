@@ -18,9 +18,6 @@ build: false
 
 test_script:
   - cargo test --verbose
-
-before_deploy:
-  # Generate artifacts for release
   - cargo build --release
   - mkdir staging
   # TODO update this part to copy the artifacts that make sense for your project
@@ -29,7 +26,6 @@ before_deploy:
     # release zipfile will look like 'rust-everywhere-v1.2.3-x86_64-pc-windows-msvc'
   - 7z a ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip *
   - appveyor PushArtifact ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip
-
   
 cache:
 - C:\Users\appveyor\.cargo

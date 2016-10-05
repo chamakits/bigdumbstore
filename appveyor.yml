@@ -14,11 +14,10 @@ install:
   - cmd: 7z e sqlite-dll-win64-x64-3100200.zip -y > nul
   - SET SQLITE3_LIB_DIR=%APPVEYOR_BUILD_FOLDER%
 
-build: false
+build: true
 
 test_script:
   - cargo test --verbose
-  - cargo test --features "backup blob chrono functions load_extension serde_json trace"
 
 cache:
 - C:\Users\appveyor\.cargo

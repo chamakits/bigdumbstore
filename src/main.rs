@@ -41,10 +41,7 @@ fn main() {
 
 pub fn setup_logging() {
     
-    match env_logger::init() {
-        Ok(_) => {},
-        Err(why) => info!("Logger likely already initalized: {}",why),
-    }
+    env_logger::init();
 }
 
 //Created this function to have it picked up in the tests in hope of it showing up in 'coveralls'

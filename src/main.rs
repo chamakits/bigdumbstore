@@ -5,6 +5,7 @@ extern crate log;
 extern crate env_logger;
 extern crate bit_vec;
 extern crate tempdir;
+extern crate home;
 
 use std::env;
 use std::io;

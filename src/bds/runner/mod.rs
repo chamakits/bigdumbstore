@@ -2,9 +2,9 @@ use super::file;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use std::env;
 use std::char;
 use std::io::prelude::*;
+use home;
 
 // TODO do this in a smart way
 // const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
@@ -108,8 +108,8 @@ fn path_with_curly_to_abs(path_maybe_with_curly: &str) -> PathBuf {
             let rest_of_path = x.split_at(1).1;
             debug!("Found home directory, file:{}, {:?}",
                    x,
-                   env::home_dir().unwrap().join(Path::new(rest_of_path)));
-            env::home_dir().unwrap().join(Path::new(rest_of_path))
+                   home::home_dir().unwrap().join(Path::new(rest_of_path)));
+            home::home_dir().unwrap().join(Path::new(rest_of_path))
         }
         _ => {
             debug!("Not a home directory specified");
@@ -139,7 +139,7 @@ fn create_directories_if_needed(path: &Path) -> String {
 }
 
 fn get_bds_store_file() -> String {
-    let home_directory: PathBuf = env::home_dir().unwrap();
+    let home_directory: PathBuf = home::home_dir().unwrap();
     let config_dir:PathBuf = home_directory.join(".config");
     let file_to_save_to = config_dir.join(".v0.0.1_store");
     return file_to_save_to.to_str().unwrap().to_string()

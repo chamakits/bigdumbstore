@@ -141,7 +141,8 @@ fn create_directories_if_needed(path: &Path) -> String {
 fn get_bds_store_file() -> String {
     let home_directory: PathBuf = home::home_dir().unwrap();
     let config_dir:PathBuf = home_directory.join(".config");
-    let file_to_save_to = config_dir.join(".v0.0.1_store");
+    let bds_dir = config_dir.join("bigdumbstore");
+    let file_to_save_to = bds_dir.join(".v0.0.1_store");
     return file_to_save_to.to_str().unwrap().to_string()
 }
 

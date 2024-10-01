@@ -1,6 +1,5 @@
 use std::string::String;
 use std::fs::File;
-use std::error::Error;
 use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
@@ -63,7 +62,7 @@ impl BdsFile {
         let file = match File::open(file_path) {
             Err(why) => panic!("couldn't open for reading {}: {}",
                                file_path,
-                               Error::description(&why)),
+                               why.to_string()),
             Ok(file) => file,
         };
         BdsFile { bds_file: file }
@@ -73,7 +72,7 @@ impl BdsFile {
         let file = match OpenOptions::new().write(true).append(true).open(file_path) {
             Err(why) => panic!("couldn't open for writing {}: {}",
                                file_path,
-                               Error::description(&why)),
+                               why.to_string()),
             Ok(file) => file,
         };
         BdsFile { bds_file: file }
@@ -222,8 +221,8 @@ impl BdsFile {
         option_val
     }
 
-    pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut Read) {
-        let mut string_in = &mut String::with_capacity(BUFF_SIZE);
+    pub fn write_to_key_from_stdin(&mut self, key: &str, stdin: &mut dyn Read) {
+        let string_in = &mut String::with_capacity(BUFF_SIZE);
         let _stdin_read_size = stdin.read_to_string(string_in);
         debug!("_stdin_read_size:{:?}, string_in.len:{}, BUFF_SIZE:{}",
                _stdin_read_size, string_in.len(), BUFF_SIZE);

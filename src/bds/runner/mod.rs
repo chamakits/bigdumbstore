@@ -7,7 +7,7 @@ use std::char;
 use std::io::prelude::*;
 
 // TODO do this in a smart way
-const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
+// const KV_FILE: &'static str = "/home/chamakits/.config/bigdumbstore/.v0.0.1_store";
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum Mode <'a> {
@@ -138,11 +138,18 @@ fn create_directories_if_needed(path: &Path) -> String {
     return resolve_path_for_home.to_str().unwrap().to_string();
 }
 
+fn get_bds_store_file() -> String {
+    let home_directory: PathBuf = env::home_dir().unwrap();
+    let config_dir:PathBuf = home_directory.join(".config");
+    let file_to_save_to = config_dir.join(".v0.0.1_store");
+    return file_to_save_to.to_str().unwrap().to_string()
+}
+
 pub fn reading<'a>(read_args: Vec<String>, path: Option<&'a str>) -> Option<String> {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
-        Option::None => KV_FILE.to_string(),
+        Option::None => get_bds_store_file(),
     };
 
     path_str = path_with_curly_to_abs(&path_str).to_str().unwrap().to_string();
@@ -203,11 +210,11 @@ pub fn junk_writing(
     
 }
 
-pub fn writing<'a>(write_args: Vec<String>, path: Option<&'a str>, read_from: &mut Read) {
+pub fn writing<'a>(write_args: Vec<String>, path: Option<&'a str>, read_from: &mut dyn Read) {
 
     let mut path_str: String = match path {
         Option::Some(_path_str) => _path_str.to_string(),
-        Option::None => KV_FILE.to_string(),
+        Option::None => get_bds_store_file().to_string(),
     };
 
     path_str = path_with_curly_to_abs(&path_str).to_str().unwrap().to_string();
@@ -354,9 +361,9 @@ mod tests {
     }
 
     use std::env;
-    use test::Bencher;
+    use tests::Bencher;
     #[bench]
-    fn test_writing_and_reading_bench(b: &mut Bencher) {
+    unsafe fn test_writing_and_reading_bench(b: &mut Bencher) {
         for (key, value) in env::vars() {
             debug!("Pre={}: {}", key, value);
         }
@@ -392,7 +399,7 @@ mod tests {
     }
 
     #[bench]
-    fn test_junk_writing_bench(b: &mut Bencher) {
+    unsafe fn test_junk_writing_bench(b: &mut Bencher) {
         for (key, value) in env::vars() {
             debug!("Pre={}: {}", key, value);
         }

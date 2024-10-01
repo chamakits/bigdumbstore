@@ -19,8 +19,11 @@ valuekey005003
 
 ## Building
 
-```
+```bash 
 cargo build --release
+
+# For the test, will need to use a nightly build; used: cargo 1.83.0-nightly (80d82ca22 2024-09-27)
+cargo +nightly build --release
 ```
 
 ## Writing

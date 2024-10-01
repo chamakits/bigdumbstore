@@ -5,11 +5,11 @@ extern crate log;
 extern crate env_logger;
 extern crate bit_vec;
 extern crate tempdir;
-extern crate test;
 
 use std::env;
 use std::io;
 mod bds;
+mod tests;
 
 use bds::runner::Mode;
 use bds::runner;
@@ -49,12 +49,3 @@ fn do_nothing(){
     debug!("Doing nothing");
 }
 
-#[cfg(test)]
-mod tests {
-    extern crate env_logger;
-    #[test]
-    fn test_do_nothing() {
-        super::setup_logging();
-        super::do_nothing();
-    }
-}

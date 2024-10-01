@@ -23,6 +23,7 @@ valuekey005003
 cargo build --release
 
 # For the test, will need to use a nightly build; used: cargo 1.83.0-nightly (80d82ca22 2024-09-27)
+rustup install nightly
 cargo +nightly build --release
 ```
 

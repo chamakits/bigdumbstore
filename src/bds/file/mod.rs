@@ -4,7 +4,6 @@ use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
 use bit_vec::BitVec;
-use log::Metadata;
 // TODO change everything in this file from i32 to i64
 
 // TODO do this in a smart way
@@ -262,13 +261,18 @@ impl BdsFile {
             // let split_val = string_in.split_at(VALUE_ENTRY_MAX_SIZE);
             let mut split_val = Self::chunks(string_in, VALUE_ENTRY_MAX_SIZE).peekable();
 
-            while(split_val.peek().is_some()) {
-                let mut next_val = split_val.next().unwrap();
-                if(split_val.peek().is_none()) {
+            let mut first_iter_done = false;
+            while split_val.peek().is_some() {
+
+                let next_val = split_val.next().unwrap();
+
+                if !first_iter_done {
+                    first_iter_done = true;
                     self.write_key_value(key, next_val, MetaData::new_final(), next_val.len());
                 } else {
                     self.write_key_value(key, next_val, MetaData::new_not_final(), next_val.len());
                 }
+
             }
         } else {
             debug!("Read from input:{}", string_in);

@@ -4,7 +4,7 @@ use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
 use bit_vec::BitVec;
-
+use log::Metadata;
 // TODO change everything in this file from i32 to i64
 
 // TODO do this in a smart way
@@ -230,7 +230,50 @@ impl BdsFile {
         let stdin_read_size = _stdin_read_size.unwrap();
         string_in.truncate(stdin_read_size);
 
-        self.write_to_key(key, string_in, stdin_read_size, MetaData::new_final());
+        // self.write_to_key(key, string_in, stdin_read_size, MetaData::new_final());
+
+        self.write_to_key_unrecursive(key, string_in, stdin_read_size, MetaData::new_final());
+    }
+
+    // From: https://stackoverflow.com/a/68130508
+    fn chunks(s: &str, length: usize) -> impl Iterator<Item=&str> {
+        assert!(length > 0);
+        let mut indices = s.char_indices().map(|(idx, _)| idx).peekable();
+
+        std::iter::from_fn(move || {
+            let start_idx = match indices.next() {
+                Some(idx) => idx,
+                None => return None,
+            };
+            for _ in 0..length - 1 {
+                indices.next();
+            }
+            let end_idx = match indices.peek() {
+                Some(idx) => *idx,
+                None => s.bytes().len(),
+            };
+            Some(&s[start_idx..end_idx])
+        })
+    }
+
+    fn write_to_key_unrecursive(&mut self, key: &str, string_in: &str,
+                    stdin_read_size: usize, metadata: MetaData) {
+        if stdin_read_size > VALUE_ENTRY_MAX_SIZE {
+            // let split_val = string_in.split_at(VALUE_ENTRY_MAX_SIZE);
+            let mut split_val = Self::chunks(string_in, VALUE_ENTRY_MAX_SIZE).peekable();
+
+            while(split_val.peek().is_some()) {
+                let mut next_val = split_val.next().unwrap();
+                if(split_val.peek().is_none()) {
+                    self.write_key_value(key, next_val, MetaData::new_final(), next_val.len());
+                } else {
+                    self.write_key_value(key, next_val, MetaData::new_not_final(), next_val.len());
+                }
+            }
+        } else {
+            debug!("Read from input:{}", string_in);
+            self.write_key_value(key, string_in, metadata, stdin_read_size);
+        }
     }
 
     fn write_to_key(&mut self, key: &str, string_in: &str,
@@ -252,7 +295,8 @@ impl BdsFile {
     }
 
     pub fn write_to_key_dynamic(&mut self, key: &str, value_in: &str) {
-        self.write_to_key(key, value_in, value_in.len(), MetaData::new_final())
+        // self.write_to_key(key, value_in, value_in.len(), MetaData::new_final())
+        self.write_to_key_unrecursive(key, value_in, value_in.len(), MetaData::new_final())
     }
 
     fn write_key_value(&mut self, key: &str, value: &str,

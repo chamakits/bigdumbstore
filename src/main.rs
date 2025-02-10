@@ -17,6 +17,7 @@ use bds::runner;
 
 fn main() {
     setup_logging();
+
     let args: Vec<String> = env::args().collect();
     debug!("Args: {:?}", args);
     let run_mode = runner::determine_mode(&args);
@@ -25,7 +26,8 @@ fn main() {
         Mode::Read(args, path) => {
             let value_found = runner::reading(args, path);
             if value_found.is_some() {
-                println!("{}", value_found.unwrap());
+//                 println!("{}", value_found.unwrap());
+                print!("{}", value_found.unwrap());
             }
         },
         Mode::Write(args, path) => {
